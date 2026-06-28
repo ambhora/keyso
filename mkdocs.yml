@@ -1,0 +1,63 @@
+# ------------------------------------------------------------------------------
+# SPDX-License-Identifier: Apache-2.0
+# ------------------------------------------------------------------------------
+
+site_name: Keyso Language
+site_description: A dictionary-based language for finite configuration spaces
+site_author: Jayesh Badwaik
+
+repo_name: ambhora/keyso-language
+repo_url: https://github.com/ambhora/keyso-language
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Language:
+      - Overview: language/index.md
+      - Concepts: language/concepts.md
+      - Syntax: language/syntax.md
+      - Set Operations: language/set-operations.md
+      - Literals and Nesting: language/literals-and-nesting.md
+      - Normal Form: language/normal-form.md
+      - Examples: language/examples.md
+      - Reference: language/reference.md

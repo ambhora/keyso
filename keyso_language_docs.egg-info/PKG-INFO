@@ -1,0 +1,30 @@
+Metadata-Version: 2.4
+Name: keyso-language-docs
+Version: 0.1.0
+Summary: Standalone MkDocs website for the Keyso dictionary language
+Author-email: Jayesh Badwaik <j.badwaik@fz-juelich.de>
+License-Expression: Apache-2.0
+Project-URL: Source, https://github.com/ambhora/keyso-language
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+
+# Keyso Language Documentation
+
+This repository contains the standalone MkDocs website for the Keyso dictionary language.
+It documents the language only and is intentionally separate from any implementation.
+
+## Local preview
+
+```bash
+python -m pip install hatch
+hatch run docs:serve
+```
+
+## Build
+
+```bash
+python -m pip install hatch
+hatch run docs:build
+```
+
+The documentation dependencies are declared in `pyproject.toml` under the Hatch `docs` environment.
