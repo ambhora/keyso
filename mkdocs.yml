@@ -6,8 +6,8 @@ site_name: Keyso Language
 site_description: A dictionary-based language for finite configuration spaces
 site_author: Jayesh Badwaik
 
-repo_name: ambhora/keyso-language
-repo_url: https://github.com/ambhora/keyso-language
+repo_name: ambhora/keyso
+repo_url: https://github.com/ambhora/keyso
 edit_uri: edit/main/docs/
 
 theme:

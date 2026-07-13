@@ -1,6 +1,0 @@
-README.md
-pyproject.toml
-keyso_language_docs.egg-info/PKG-INFO
-keyso_language_docs.egg-info/SOURCES.txt
-keyso_language_docs.egg-info/dependency_links.txt
-keyso_language_docs.egg-info/top_level.txt
