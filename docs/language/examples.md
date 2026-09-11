@@ -18,6 +18,7 @@
   "_product": [
     {"system": ["jedi", "jupiter"]},
     {"nodes": [1, 2, 4]},
+    {"cores_per_node": {"_interval": {"start": 16, "stop": 32, "step": 8}}},
     {"tasks_per_node": [4, 8]}
   ]
 }

@@ -58,6 +58,7 @@ nav:
       - Syntax: language/syntax.md
       - Set Operations: language/set-operations.md
       - Literals and Nesting: language/literals-and-nesting.md
+      - Intervals: language/intervals.md
       - Normal Form: language/normal-form.md
       - Examples: language/examples.md
       - Reference: language/reference.md

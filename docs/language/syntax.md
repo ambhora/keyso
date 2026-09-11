@@ -9,6 +9,7 @@ The following keys are reserved:
 ```text
 _literal
 _nested
+_interval
 _set
 _product
 _union
@@ -52,6 +53,34 @@ Result:
   {"compiler": "clang"}
 ]
 ```
+
+## Interval value
+
+`_interval` is a value construct that compactly enumerates a finite sequence of integer values. It contains `start` and `stop`, and may contain `step`. The `stop` value is inclusive and `step` defaults to `1`.
+
+```keyso
+{
+  "cores": {
+    "_interval": {
+      "start": 16,
+      "stop": 32,
+      "step": 8
+    }
+  }
+}
+```
+
+Result:
+
+```keyso
+[
+  {"cores": 16},
+  {"cores": 24},
+  {"cores": 32}
+]
+```
+
+`start`, `stop`, and `step` are integers. `step` must be greater than zero, and `start` must be less than or equal to `stop`.
 
 ## Explicit set
 

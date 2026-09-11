@@ -26,6 +26,24 @@ has the normal form:
 }
 ```
 
+Finite value constructs such as `_interval` are expanded in normal form. For example,
+
+```keyso
+{"cores": {"_interval": {"start": 16, "stop": 32, "step": 8}}}
+```
+
+has the normal form:
+
+```keyso
+{
+  "_set": [
+    {"cores": 16},
+    {"cores": 24},
+    {"cores": 32}
+  ]
+}
+```
+
 Normal form is useful for:
 
 - comparing two Keyso documents,

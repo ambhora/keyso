@@ -6,6 +6,7 @@
 | --- | --- |
 | `_literal` | Treat the contained object as a value |
 | `_nested` | Evaluate the contained Keyso document independently and use its results as values |
+| `_interval` | Enumerate an inclusive finite integer range |
 | `_set` | Explicitly enumerate a finite configuration space |
 | `_product` | Product of spaces with disjoint types |
 | `_union` | Union of spaces with equal types |
@@ -27,6 +28,22 @@
 ```keyso
 {"key": ["value1", "value2"]}
 ```
+
+### Interval
+
+```keyso
+{
+  "key": {
+    "_interval": {
+      "start": 16,
+      "stop": 32,
+      "step": 8
+    }
+  }
+}
+```
+
+`start` and `stop` are required integers. `step` is an optional positive integer and defaults to `1`. `stop` is inclusive.
 
 ### Explicit set
 
@@ -99,4 +116,5 @@
 | --- | --- |
 | `{"key": {"_literal": object}}` | `object` is data |
 | `{"key": {"_nested": keyso_document}}` | `keyso_document` is evaluated independently |
-| `{"key": { ... }}` | invalid unless wrapped in `_literal` or `_nested` |
+| `{"key": {"_interval": {"start": a, "stop": b, "step": s}}}` | inclusive integer values from `a` through `b` using positive step `s` |
+| `{"key": { ... }}` | invalid unless wrapped in `_literal`, `_nested`, or `_interval` |
