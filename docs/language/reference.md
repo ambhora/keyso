@@ -1,120 +1,82 @@
+<!--
+SPDX-FileCopyrightText: 2026 keyso developers
+SPDX-License-Identifier: Apache-2.0
+-->
 # Reference
 
-## Reserved keywords
+A compact summary of the language. The other pages of this section explain each
+construct with examples.
 
-| Keyword | Role |
+## Structure
+
+```text
+document       = { name: definition, ... }       one or more definitions
+definition     = [ item, ... ]                    operands and one operation item
+item           = operation-item | operand
+operation-item = { operation: product | union | intersection | difference | set }
+operand        = inline | flatten | configuration
+inline         = { key: value }                   not under set
+flatten        = { flatten: name }                not under set
+configuration  = { key: data, ... }               under set only
+value          = scalar
+               | [ scalar, ... ]
+               | { interval: { start: int, stop: int, step: int } }
+               | { literal: data }
+               | { nested: name }
+```
+
+A `key` is any string except `operation` and `flatten`. A `name` is the name of
+a definition in the same document. `data` is any value of the data model.
+
+## Reserved words
+
+| Word | Role |
 | --- | --- |
-| `_literal` | Treat the contained object as a value |
-| `_nested` | Evaluate the contained Keyso document independently and use its results as values |
-| `_interval` | Enumerate an inclusive finite integer range |
-| `_set` | Explicitly enumerate a finite configuration space |
-| `_product` | Product of spaces with disjoint types |
-| `_union` | Union of spaces with equal types |
-| `_intersection` | Intersection of spaces with equal types |
-| `_difference` | Difference of two spaces with equal types |
-| `_minuend` | Left operand of `_difference` |
-| `_subtrahend` | Right operand of `_difference` |
+| `operation` | item key naming the operation of a definition |
+| `flatten` | item key: use the set of a definition with its own keys |
+| `interval` | dictionary value: a finite range of integers |
+| `literal` | dictionary value: uninterpreted data |
+| `nested` | dictionary value: the configurations of a definition as values |
+| `product` | operation: product of anticoherent sets |
+| `union` | operation: union of coherent sets |
+| `intersection` | operation: intersection of coherent sets |
+| `difference` | operation: difference of two coherent sets |
+| `set` | operation: an explicit set of configurations |
 
-## Construct summary
+## Operands
 
-### Key-value
+| Operand | Denotes | Type |
+| --- | --- | --- |
+| `key: value` | one configuration per value | `{key}` |
+| `flatten: name` | the set of `name` | the type of `name` |
+| `{k1: d1, ..., kn: dn}` | one configuration | `{k1, ..., kn}` |
 
-```keyso
-{"key": "value"}
-```
+## Values
 
-### Key-multivalue
-
-```keyso
-{"key": ["value1", "value2"]}
-```
-
-### Interval
-
-```keyso
-{
-  "key": {
-    "_interval": {
-      "start": 16,
-      "stop": 32,
-      "step": 8
-    }
-  }
-}
-```
-
-`start` and `stop` are required integers. `step` is an optional positive integer and defaults to `1`. `stop` is inclusive.
-
-### Explicit set
-
-```keyso
-{
-  "_set": [
-    {"key1": "value1", "key2": "value2"},
-    {"key1": "value3", "key2": "value4"}
-  ]
-}
-```
-
-### Product
-
-```keyso
-{
-  "_product": [
-    {"key1": ["a", "b"]},
-    {"key2": ["c", "d"]}
-  ]
-}
-```
-
-### Union
-
-```keyso
-{
-  "_union": [
-    {"key": ["a", "b"]},
-    {"key": ["b", "c"]}
-  ]
-}
-```
-
-### Intersection
-
-```keyso
-{
-  "_intersection": [
-    {"key": ["a", "b"]},
-    {"key": ["b", "c"]}
-  ]
-}
-```
-
-### Difference
-
-```keyso
-{
-  "_difference": {
-    "_minuend": {"key": ["a", "b", "c"]},
-    "_subtrahend": {"key": ["b"]}
-  }
-}
-```
-
-## Type requirements
-
-| Operation | Type requirement |
+| Value | Denotes |
 | --- | --- |
-| `_product` | operands must have disjoint types |
-| `_union` | operands must have equal types |
-| `_intersection` | operands must have equal types |
-| `_difference` | minuend and subtrahend must have equal types |
-| `_set` | all listed configurations must have equal types |
+| scalar | the scalar |
+| `[a1, ..., an]` | each element; the elements are scalars |
+| `{interval: {start: a, stop: b, step: s}}` | `a, a + s, a + 2·s, ...` up to `b`; `a ≤ b`, `s ≥ 1`, `s` defaults to `1` |
+| `{literal: data}` | `data` |
+| `{nested: name}` | each configuration of `name` |
+| any other dictionary | invalid |
 
-## Dictionary value rules
+## Operations
 
-| Form | Meaning |
-| --- | --- |
-| `{"key": {"_literal": object}}` | `object` is data |
-| `{"key": {"_nested": keyso_document}}` | `keyso_document` is evaluated independently |
-| `{"key": {"_interval": {"start": a, "stop": b, "step": s}}}` | inclusive integer values from `a` through `b` using positive step `s` |
-| `{"key": { ... }}` | invalid unless wrapped in `_literal`, `_nested`, or `_interval` |
+| Operation | Operands | Requirement | Result type |
+| --- | --- | --- | --- |
+| `product` | one or more | pairwise disjoint types | union of the operand types |
+| `union` | one or more | equal types | the common type |
+| `intersection` | one or more | equal types | the common type |
+| `difference` | exactly two | equal types | the common type |
+| `set` | one or more configurations | equal types | the common type |
+
+## References
+
+- A `flatten` operand or a `nested` value must name a definition in the same
+  document.
+- References must not form a cycle.
+- A name is not part of the type of the set it names.
+- The order of definitions and the position of the `operation` item carry no
+  meaning.

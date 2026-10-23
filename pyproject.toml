@@ -1,23 +1,24 @@
-# --------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # SPDX-License-Identifier: Apache-2.0
-# --------------------------------------------------------------------------------------------------
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
+# SPDX-FileCopyrightText: 2026 keyso developers
+# ------------------------------------------------------------------------------
 [project]
 name = "keyso-docs"
 version = "0.1.0"
-description = "Specification for keyso"
-readme = "README.md"
+description = "Specification of the Keyso language"
+readme = "readme.md"
 requires-python = ">=3.11"
-dependencies = [
-    "mkdocs>=1.6.0",
-    "mkdocs-material>=9.5.0",
-    "pymdown-extensions>=10.7",
-    "pygments>=2.17.0",
+license = "Apache-2.0"
+authors = [{ name = "Jayesh Badwaik", email = "j.badwaik@fz-juelich.de" }]
+
+[dependency-groups]
+docs = [
+  "properdocs>=1.6.7",
+  "mkdocs-materialx>=10.2.1",
+  "pymdown-extensions>=10.7",
 ]
 
+# The repository holds a website, not a package.
 [tool.uv]
 package = false
+default-groups = ["docs"]

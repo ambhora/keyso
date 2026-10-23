@@ -1,73 +1,114 @@
-# Normal Form
+<!--
+SPDX-FileCopyrightText: 2026 keyso developers
+SPDX-License-Identifier: Apache-2.0
+-->
+# Normal form
 
-Every finite Keyso document can be represented as an explicit `_set`.
+Every definition denotes a configuration set. When that set is not empty, it can
+be written as an explicit `set` of its configurations. This is the **normal
+form** of the definition.
 
-For example:
-
-```keyso
-{
-  "_product": [
-    {"compiler": ["gcc", "clang"]},
-    {"optimization": ["O0", "O2"]}
-  ]
-}
+```yaml
+compiler_matrix:
+  - compiler: [gcc, clang]
+  - optimization: [O0, O2]
+  - operation: product
 ```
 
 has the normal form:
 
-```keyso
-{
-  "_set": [
-    {"compiler": "gcc", "optimization": "O0"},
-    {"compiler": "gcc", "optimization": "O2"},
-    {"compiler": "clang", "optimization": "O0"},
-    {"compiler": "clang", "optimization": "O2"}
-  ]
-}
+```yaml
+compiler_matrix:
+  - {compiler: gcc, optimization: O0}
+  - {compiler: gcc, optimization: O2}
+  - {compiler: clang, optimization: O0}
+  - {compiler: clang, optimization: O2}
+  - operation: set
 ```
 
-Finite value constructs such as `_interval` are expanded in normal form. For example,
+The order of the configurations carries no meaning, and each configuration
+appears once.
 
-```keyso
-{"cores": {"_interval": {"start": 16, "stop": 32, "step": 8}}}
+## Value constructs
+
+Value constructs are expanded in normal form. An interval becomes its integers,
+a list its elements and a literal its content:
+
+```yaml
+cores:
+  - cores: {interval: {start: 16, stop: 32, step: 8}}
+  - operation: product
 ```
 
 has the normal form:
 
-```keyso
-{
-  "_set": [
-    {"cores": 16},
-    {"cores": 24},
-    {"cores": 32}
-  ]
-}
+```yaml
+cores:
+  - {cores: 16}
+  - {cores: 24}
+  - {cores: 32}
+  - operation: set
 ```
 
-Normal form is useful for:
+## References
 
-- comparing two Keyso documents,
-- inspecting the exact generated configuration space,
-- removing duplicate configurations,
-- serializing the final result of set operations.
+A normal form mentions no other definition. Flatten operands contribute their
+keys directly; nested values become dictionaries.
 
-## Empty spaces
+```yaml
+build:
+  - compiler: [gcc, clang]
+  - operation: product
 
-A set operation may produce an empty configuration space.
+flat:
+  - flatten: build
+  - system: [jedi, jupiter]
+  - operation: product
 
-```keyso
-{
-  "_difference": {
-    "_minuend": {"compiler": ["gcc"]},
-    "_subtrahend": {"compiler": ["gcc"]}
-  }
-}
+nested:
+  - build: {nested: build}
+  - system: [jedi, jupiter]
+  - operation: product
 ```
 
-The result has no configurations, but it still has a type:
+has the normal form:
 
-```text
-{compiler}
+```yaml
+build:
+  - {compiler: gcc}
+  - {compiler: clang}
+  - operation: set
+
+flat:
+  - {compiler: gcc, system: jedi}
+  - {compiler: gcc, system: jupiter}
+  - {compiler: clang, system: jedi}
+  - {compiler: clang, system: jupiter}
+  - operation: set
+
+nested:
+  - {build: {compiler: gcc}, system: jedi}
+  - {build: {compiler: gcc}, system: jupiter}
+  - {build: {compiler: clang}, system: jedi}
+  - {build: {compiler: clang}, system: jupiter}
+  - operation: set
 ```
 
-This matters because empty spaces can still participate in later set operations as typed spaces.
+The dictionaries under `build` are data, as every value in a configuration
+operand is. The normal form of a document replaces every definition by its
+normal form. Because references form no cycle, it is always well defined.
+
+## Equivalence
+
+Two definitions are **equivalent** when they denote the same set: the same type
+and the same configurations. Two non-empty definitions are equivalent exactly
+when their normal forms contain the same configurations. Normal forms are
+therefore the basis for comparing documents, inspecting the configurations a
+document generates, and serializing the result of the set operations.
+
+## Empty sets
+
+An empty set has a type but no configurations, and a `set` needs at least one
+configuration to determine its type. An empty set therefore has no normal form.
+An implementation that serializes normal forms represents an empty set together
+with its type by other means.

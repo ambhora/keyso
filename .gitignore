@@ -1,6 +1,9 @@
-site/
-.cache/
+# ------------------------------------------------------------------------------
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 keyso developers
+# ------------------------------------------------------------------------------
 __pycache__/
+.cache/
+.venv/
+build/
 .DS_Store
-*.egg-info
-uv.lock
