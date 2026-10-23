@@ -12,7 +12,7 @@ form** of the definition.
 compiler_matrix:
   - compiler: [gcc, clang]
   - optimization: [O0, O2]
-  - operation: product
+  - _operation: product
 ```
 
 has the normal form:
@@ -23,21 +23,33 @@ compiler_matrix:
   - {compiler: gcc, optimization: O2}
   - {compiler: clang, optimization: O0}
   - {compiler: clang, optimization: O2}
-  - operation: set
+  - _operation: set
 ```
 
 The order of the configurations carries no meaning, and each configuration
 appears once.
 
+## Writing configurations
+
+In a normal form, every configuration is written as a configuration operand:
+
+- paths are written nested, one dictionary level per key;
+- a value that is a scalar other than null, or a list, is written as it is;
+- a value that is a dictionary or null is written as `{_literal: value}`.
+
+The `_literal` marker keeps a dictionary value apart from the nested paths it
+would otherwise be read as. Read back as a configuration operand, the written
+form gives the same configuration.
+
 ## Value constructs
 
-Value constructs are expanded in normal form. An interval becomes its integers,
-a list its elements and a literal its content:
+Value constructs are expanded in normal form. An interval becomes its integers
+and a list its elements:
 
 ```yaml
 cores:
-  - cores: {interval: {start: 16, stop: 32, step: 8}}
-  - operation: product
+  - cores: {_interval: {start: 16, stop: 32, step: 8}}
+  - _operation: product
 ```
 
 has the normal form:
@@ -47,28 +59,28 @@ cores:
   - {cores: 16}
   - {cores: 24}
   - {cores: 32}
-  - operation: set
+  - _operation: set
 ```
 
 ## References
 
-A normal form mentions no other definition. Flatten operands contribute their
-keys directly; nested values become dictionaries.
+A normal form mentions no other definition. Reference operands contribute their
+paths directly; nested values contribute prefixed paths.
 
 ```yaml
 build:
   - compiler: [gcc, clang]
-  - operation: product
+  - _operation: product
 
 flat:
-  - flatten: build
+  - build
   - system: [jedi, jupiter]
-  - operation: product
+  - _operation: product
 
 nested:
-  - build: {nested: build}
+  - build: {_nested: build}
   - system: [jedi, jupiter]
-  - operation: product
+  - _operation: product
 ```
 
 has the normal form:
@@ -77,26 +89,25 @@ has the normal form:
 build:
   - {compiler: gcc}
   - {compiler: clang}
-  - operation: set
+  - _operation: set
 
 flat:
   - {compiler: gcc, system: jedi}
   - {compiler: gcc, system: jupiter}
   - {compiler: clang, system: jedi}
   - {compiler: clang, system: jupiter}
-  - operation: set
+  - _operation: set
 
 nested:
   - {build: {compiler: gcc}, system: jedi}
   - {build: {compiler: gcc}, system: jupiter}
   - {build: {compiler: clang}, system: jedi}
   - {build: {compiler: clang}, system: jupiter}
-  - operation: set
+  - _operation: set
 ```
 
-The dictionaries under `build` are data, as every value in a configuration
-operand is. The normal form of a document replaces every definition by its
-normal form. Because references form no cycle, it is always well defined.
+The normal form of a document replaces every definition by its normal form.
+Because references form no cycle, it is always well defined.
 
 ## Equivalence
 

@@ -12,7 +12,7 @@ Complete documents for common tasks. Each example is valid on its own.
 compiler_matrix:
   - compiler: [gcc, clang]
   - optimization: [O0, O2, O3]
-  - operation: product
+  - _operation: product
 ```
 
 Six configurations of type `{compiler, optimization}`.
@@ -23,9 +23,9 @@ Six configurations of type `{compiler, optimization}`.
 runs:
   - system: [jedi, jupiter]
   - nodes: [1, 2, 4]
-  - cores_per_node: {interval: {start: 16, stop: 32, step: 8}}
+  - cores_per_node: {_interval: {start: 16, stop: 32, step: 8}}
   - tasks_per_node: [4, 8]
-  - operation: product
+  - _operation: product
 ```
 
 Thirty-six configurations of type
@@ -37,16 +37,16 @@ Thirty-six configurations of type
 candidates:
   - compiler: [gcc, clang]
   - optimization: [O0, O2]
-  - operation: product
+  - _operation: product
 
 unsupported:
   - {compiler: clang, optimization: O0}
-  - operation: set
+  - _operation: set
 
 builds:
-  - flatten: candidates
-  - flatten: unsupported
-  - operation: difference
+  - candidates
+  - unsupported
+  - _operation: difference
 ```
 
 ## Add a special case to a grid
@@ -55,16 +55,16 @@ builds:
 grid:
   - compiler: [gcc, clang]
   - optimization: [O2, O3]
-  - operation: product
+  - _operation: product
 
 special:
   - {compiler: intel, optimization: O2}
-  - operation: set
+  - _operation: set
 
 builds:
-  - flatten: grid
-  - flatten: special
-  - operation: union
+  - grid
+  - special
+  - _operation: union
 ```
 
 ## Reuse one set in several others
@@ -72,37 +72,37 @@ builds:
 ```yaml
 compilers:
   - compiler: [gcc, clang]
-  - operation: product
+  - _operation: product
 
 debug_builds:
-  - flatten: compilers
+  - compilers
   - optimization: O0
-  - operation: product
+  - _operation: product
 
 release_builds:
-  - flatten: compilers
+  - compilers
   - optimization: [O2, O3]
-  - operation: product
+  - _operation: product
 ```
 
-## Build and run sections, flattened
+## Build and run sections, merged
 
 ```yaml
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
-  - operation: product
+  - _operation: product
 
 run:
   - nodes: [1, 2]
   - tasks_per_node: [4, 8]
-  - operation: product
+  - _operation: product
 
 jobs:
   - system: [jedi, jupiter]
-  - flatten: build
-  - flatten: run
-  - operation: product
+  - build
+  - run
+  - _operation: product
 ```
 
 The type of `jobs` is `{system, compiler, mpi, nodes, tasks_per_node}`, and each
@@ -119,41 +119,66 @@ With the same `build` and `run`:
 ```yaml
 jobs:
   - system: [jedi, jupiter]
-  - build: {nested: build}
-  - run: {nested: run}
-  - operation: product
+  - build: {_nested: build}
+  - run: {_nested: run}
+  - _operation: product
 ```
 
-The type of `jobs` is `{system, build, run}`. Each configuration carries one
-build and one run as dictionaries:
+The type of `jobs` is
+`{system, build.compiler, build.mpi, run.nodes, run.tasks_per_node}`:
 
 ```yaml
 {system: jedi, build: {compiler: gcc, mpi: openmpi}, run: {nodes: 1, tasks_per_node: 4}}
 ```
+
+## A nested section from dotted keys
+
+A section can be built in place, without a separate definition:
+
+```yaml
+jobs:
+  - system: [jedi, jupiter]
+  - run.nodes: [1, 2]
+  - run.tasks_per_node: [4, 8]
+  - _operation: product
+```
+
+The type of `jobs` is `{system, run.nodes, run.tasks_per_node}`.
 
 ## Cross compilation
 
 ```yaml
 toolchain:
   - compiler: [gcc, clang]
-  - operation: product
+  - _operation: product
 
 cross:
-  - host: {nested: toolchain}
-  - target: {nested: toolchain}
-  - operation: product
+  - host: {_nested: toolchain}
+  - target: {_nested: toolchain}
+  - _operation: product
+
+native:
+  - {host.compiler: gcc, target.compiler: gcc}
+  - {host.compiler: clang, target.compiler: clang}
+  - _operation: set
+
+true_cross:
+  - cross
+  - native
+  - _operation: difference
 ```
 
-The same set appears twice and must be nested, because flattening it twice would
-contribute `compiler` twice.
+The same set is nested twice; referencing it twice would contribute `compiler`
+twice. `true_cross` contains the two pairs whose compilers differ.
 
 ## Parameters as data
 
 ```yaml
 cases:
-  - mesh: {literal: {nx: 128, ny: 128}}
+  - mesh: {_literal: {nx: 128, ny: 128}}
   - solver: [cg, gmres]
-  - operation: product
+  - _operation: product
 ```
 
-Two configurations; the value of `mesh` is the same dictionary in both.
+Two configurations of type `{mesh, solver}`; the value of `mesh` is the same
+dictionary in both.

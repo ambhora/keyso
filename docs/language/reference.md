@@ -13,43 +13,46 @@ construct with examples.
 document       = { name: definition, ... }       one or more definitions
 definition     = [ item, ... ]                    operands and one operation item
 item           = operation-item | operand
-operation-item = { operation: product | union | intersection | difference | set }
-operand        = inline | flatten | configuration
-inline         = { key: value }                   not under set
-flatten        = { flatten: name }                not under set
-configuration  = { key: data, ... }               under set only
+operation-item = { _operation: operation }
+operation      = product | union | intersection | difference | set
+operand        = reference | inline | configuration
+reference      = name                             not under set
+inline         = { path: value }                  not under set
+configuration  = { path: entry, ... }             under set only
 value          = scalar
                | [ scalar, ... ]
-               | { interval: { start: int, stop: int, step: int } }
-               | { literal: data }
-               | { nested: name }
+               | { _interval: { start: integer, stop: integer, step: integer } }
+               | { _literal: data }
+               | { _nested: name }
+entry          = scalar | [ data, ... ] | { _literal: data } | { path: entry, ... }
+path           = key | path.key
+name           = key
+key            = non-empty string, not beginning with _, without .
+scalar         = string | number | boolean
 ```
 
-A `key` is any string except `operation` and `flatten`. A `name` is the name of
-a definition in the same document. `data` is any value of the data model.
+`data` is any value of the data model, null included. A scalar written directly
+is never null.
 
-## Reserved words
+## Language words
 
 | Word | Role |
 | --- | --- |
-| `operation` | item key naming the operation of a definition |
-| `flatten` | item key: use the set of a definition with its own keys |
-| `interval` | dictionary value: a finite range of integers |
-| `literal` | dictionary value: uninterpreted data |
-| `nested` | dictionary value: the configurations of a definition as values |
-| `product` | operation: product of anticoherent sets |
-| `union` | operation: union of coherent sets |
-| `intersection` | operation: intersection of coherent sets |
-| `difference` | operation: difference of two coherent sets |
-| `set` | operation: an explicit set of configurations |
+| `_operation` | item key naming the operation of a definition |
+| `_nested` | dictionary value: another definition under the path of the operand |
+| `_literal` | dictionary value: uninterpreted data |
+| `_interval` | dictionary value: a finite range of integers |
+
+Every string beginning with `_` is reserved for the language.
 
 ## Operands
 
 | Operand | Denotes | Type |
 | --- | --- | --- |
-| `key: value` | one configuration per value | `{key}` |
-| `flatten: name` | the set of `name` | the type of `name` |
-| `{k1: d1, ..., kn: dn}` | one configuration | `{k1, ..., kn}` |
+| `name` | the set of `name` | the type of `name` |
+| `path: value` | one configuration per value | `{path}` |
+| `path: {_nested: name}` | the set of `name`, prefixed | the paths of `name`, each prefixed with `path.` |
+| `{p1: e1, ..., pn: en}` | one configuration | the paths of the entries |
 
 ## Values
 
@@ -57,16 +60,16 @@ a definition in the same document. `data` is any value of the data model.
 | --- | --- |
 | scalar | the scalar |
 | `[a1, ..., an]` | each element; the elements are scalars |
-| `{interval: {start: a, stop: b, step: s}}` | `a, a + s, a + 2·s, ...` up to `b`; `a ≤ b`, `s ≥ 1`, `s` defaults to `1` |
-| `{literal: data}` | `data` |
-| `{nested: name}` | each configuration of `name` |
-| any other dictionary | invalid |
+| `{_interval: {start: a, stop: b, step: s}}` | `a, a + s, a + 2·s, ...` up to `b`; `a ≤ b`, `s ≥ 1`, `s` defaults to `1` |
+| `{_literal: data}` | `data` |
+| `{_nested: name}` | each configuration of `name`, under the path of the operand |
+| null, or any other dictionary | invalid |
 
 ## Operations
 
 | Operation | Operands | Requirement | Result type |
 | --- | --- | --- | --- |
-| `product` | one or more | pairwise disjoint types | union of the operand types |
+| `product` | one or more | pairwise anticoherent types | union of the operand types |
 | `union` | one or more | equal types | the common type |
 | `intersection` | one or more | equal types | the common type |
 | `difference` | exactly two | equal types | the common type |
@@ -74,9 +77,10 @@ a definition in the same document. `data` is any value of the data model.
 
 ## References
 
-- A `flatten` operand or a `nested` value must name a definition in the same
+- A reference operand or a `_nested` value must name a definition in the same
   document.
+- A definition named by `_nested` must have at least one path.
 - References must not form a cycle.
 - A name is not part of the type of the set it names.
-- The order of definitions and the position of the `operation` item carry no
+- The order of definitions and the position of the `_operation` item carry no
   meaning.

@@ -13,21 +13,22 @@ set.
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
-  - operation: product
+  - _operation: product
 
 flat_jobs:
   - system: [jedi, jupiter]
-  - flatten: build
-  - operation: product
+  - build
+  - _operation: product
 
 nested_jobs:
   - system: [jedi, jupiter]
-  - build: {nested: build}
-  - operation: product
+  - build: {_nested: build}
+  - _operation: product
 ```
 
 `flat_jobs` has type `{system, compiler, mpi}`; `nested_jobs` has type
-`{system, build}`, with each build kept whole as a dictionary.
+`{system, build.compiler, build.mpi}`, written with each build as a nested
+dictionary.
 
 This repository holds the language specification, published at
 <https://ambhora.github.io/keyso/>. It documents the language only and is

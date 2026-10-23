@@ -23,45 +23,60 @@ reused and tested on its own, and an error points to a named definition rather
 than a position deep inside an expression. Each definition names exactly one
 operation, so it reads like one equation of the algebra.
 
-## Flatten and nested are both explicit
+## A reserved prefix
 
-A named set can be used in two ways that produce different types: its keys can
-join the result, or its configurations can become the values of one key. Neither
-use is a default. A bare name could be read either way, and in YAML a stray
-colon turns a bare name into a key with a null value, which is valid but means
-something else. Writing `flatten: build` or `build: {nested: build}` states the
-type of the result at the point of use, and makes both uses equally visible to
-the reader.
+Every word of the language begins with `_`, and keys never do. A language word
+cannot be mistaken for a key, wherever it appears. Reserving a prefix rather
+than individual words also means that a later version can add a word without
+changing the meaning of any valid document. An earlier draft used plain words
+such as `operation` and `flatten`; in operand position they looked like ordinary
+keys.
+
+## One way to refer, one way to nest
+
+A bare name uses another set as it is. A `_nested` value places it under a key.
+The two are told apart by their shape: a name is a string and an inline operand
+is a dictionary. In the algebra both are nestings, the first with the empty
+prefix, so the language needs no word for the first.
+
+## Paths
+
+Nesting prefixes paths instead of storing configurations inside configurations.
+A nested configuration is a configuration over dotted paths, and the nested
+dictionary is how it is written. This keeps one notion of configuration and one
+notion of type. Type requirements are checked on paths, so two nested sets with
+the same inner keys can be combined, and dotted keys reach into nested positions
+where a set operation needs them.
 
 ## Marked dictionaries
 
 A dictionary in a document is either a construct to interpret or data to keep.
-Keyso never guesses: every dictionary value of an inline operand is marked as
-`interval`, `literal` or `nested`, and a plain dictionary is invalid. Under
-`set`, where operands are complete configurations, all values are data.
+Keyso never guesses. In an inline operand, every dictionary value is marked as
+`_interval`, `_literal` or `_nested`. In a configuration operand, a dictionary
+describes paths and a dictionary value is marked with `_literal`. Normal forms
+keep the marker, so writing a configuration and reading it back gives the same
+configuration.
 
-## Words instead of sigils
+## No bare null
 
-Reserved words are plain words in fixed positions: `operation` and `flatten` as
-item keys, `interval`, `literal` and `nested` as the single key of a dictionary
-value. Earlier drafts marked keywords with a leading underscore. Positions make
-the same distinction without reserving a character, and keep documents readable.
+In YAML, a key with nothing after its colon is null. A reference operand written
+with a stray colon, `- build:` instead of `- build`, would otherwise be a valid
+operand with a null value. Requiring `{_literal: null}` makes the slip an error.
 
 ## Typed empty sets
 
 A configuration set records its type even when it is empty. An empty difference
 still has a type, so it can take part in later operations whose type
-requirements are checked as usual, and an empty result never silently changes
-the type of a document.
+requirements are checked as usual.
 
 ## No restrictions on values
 
-Keyso does not restrict the values a key may take. In a data transfer between a
-source and a destination, the key `os` may need different admissible values on
-each side. Nesting keeps that structure, with `source: {nested: ...}` and
-`destination: {nested: ...}`, but a per-key restriction would make the meaning
-of `os` depend on where a set is used, and sets would no longer compose locally.
-Restrictions on values belong to schemas and validators built on Keyso.
+Keyso does not restrict the values a path may take. In a data transfer, the
+operating system of the source and of the destination may admit different
+values. Paths keep the two apart as `source.os` and `destination.os`, but a
+restriction per key would make the meaning of `os` depend on where a set is
+used, and sets would no longer compose locally. Restrictions on values belong to
+schemas and validators built on Keyso.
 
 ## Language, not implementation
 

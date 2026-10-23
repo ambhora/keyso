@@ -2,15 +2,15 @@
 SPDX-FileCopyrightText: 2026 keyso developers
 SPDX-License-Identifier: Apache-2.0
 -->
-# Flatten and nested
+# References and nesting
 
-A definition can use the set of another definition in two ways. Both name the
-other definition explicitly; they differ in the type of the result.
+A definition uses the set of another definition in one of two ways. Both name
+the other definition; they differ in where its paths end up.
 
-| Form | Written as | Contributes |
+| Form | Written as | Paths of the result |
 | --- | --- | --- |
-| flatten | `- flatten: build` | every key of `build` |
-| nested | `- key: {nested: build}` | the single key `key`, whose values are configurations of `build` |
+| reference | `- build` | the paths of `build`, unchanged |
+| nested | `- key: {_nested: build}` | the paths of `build`, each prefixed with `key.` |
 
 ## One set, two shapes
 
@@ -20,20 +20,19 @@ The running example has a set of builds:
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
-  - operation: product
+  - _operation: product
 ```
 
-**Flattened** into a product, `build` contributes its keys:
+**Referenced** in a product, `build` contributes its paths unchanged:
 
 ```yaml
 run:
   - system: [jedi, jupiter]
-  - flatten: build
-  - operation: product
+  - build
+  - _operation: product
 ```
 
-The type of `run` is `{system, compiler, mpi}`, and its eight configurations are
-flat:
+The type of `run` is `{system, compiler, mpi}`:
 
 ```yaml
 - {system: jedi, compiler: gcc, mpi: openmpi}
@@ -41,18 +40,16 @@ flat:
 - ...
 ```
 
-**Nested** under a key, `build` contributes one key whose values are its
-configurations:
+**Nested** under a key, `build` contributes its paths below that key:
 
 ```yaml
 run:
   - system: [jedi, jupiter]
-  - build: {nested: build}
-  - operation: product
+  - build: {_nested: build}
+  - _operation: product
 ```
 
-The type of `run` is `{system, build}`, and each of its eight configurations
-carries one build as a dictionary:
+The type of `run` is `{system, build.compiler, build.mpi}`:
 
 ```yaml
 - {system: jedi, build: {compiler: gcc, mpi: openmpi}}
@@ -60,62 +57,97 @@ carries one build as a dictionary:
 - ...
 ```
 
-The key and the definition need not share a name; `- toolchain: {nested: build}`
-is equally valid.
+The key and the definition need not share a name;
+`- toolchain: {_nested: build}` is equally valid, and so is a dotted key such as
+`- stage.build: {_nested: build}`.
 
-## Same configurations, different types
+## Nesting is prefixing
 
-The two forms carry the same information. Each flat configuration of `run`
-corresponds to exactly one nested configuration and back, so both sets have the
-same number of elements. The
-[algebra](../formalism/algebra.md#nesting-and-flattening) states this as a
-proposition.
+A nested value does not store configurations inside configurations. It prefixes
+paths. The nested `run` above is the same set as
 
-They differ in the type requirements they impose. Under `product`, the keys of a
-flattened set must be disjoint from the keys of every other operand. The keys of
-a nested set are hidden behind the key that holds them and may coincide with
-keys elsewhere. Only the holding key must be distinct.
+```yaml
+run:
+  - system: [jedi, jupiter]
+  - build.compiler: [gcc, clang]
+  - build.mpi: [openmpi, mpich]
+  - _operation: product
+```
 
-A cross-compilation matrix uses the same toolchain set twice and therefore has
-to nest it:
+because prefixing commutes with the set operations: prefixing a product is the
+product of the prefixed operands. The [algebra](../formalism/algebra.md#nesting)
+proves this. A reference operand is the same operation with an empty prefix,
+which is why the language needs no separate word for it.
+
+The nested dictionary `{build: {compiler: gcc}}` and the dotted
+`{build.compiler: gcc}` are two spellings of the same configuration.
+Configurations are written nested by default; a dotted path is useful where it
+is shorter.
+
+## Type requirements
+
+Under `product`, the paths of all operands must be anticoherent: no path may
+equal another or be a prefix of it. Prefixing keeps nested paths apart, so the
+same set can be nested twice under different keys:
 
 ```yaml
 toolchain:
   - compiler: [gcc, clang]
-  - operation: product
+  - _operation: product
 
 cross:
-  - host: {nested: toolchain}
-  - target: {nested: toolchain}
-  - operation: product
+  - host: {_nested: toolchain}
+  - target: {_nested: toolchain}
+  - _operation: product
 ```
 
-The type of `cross` is `{host, target}`. Flattening `toolchain` twice is
-invalid, because both operands would contribute `compiler`.
+The type of `cross` is `{host.compiler, target.compiler}`. Referencing
+`toolchain` twice in a product is invalid, because both operands would
+contribute `compiler`.
+
+## Addressing nested paths
+
+A dotted key reaches into a nested position. This keeps set operations on nested
+sets short. The cross-compilation pairs without the native ones are:
+
+```yaml
+native:
+  - {host.compiler: gcc, target.compiler: gcc}
+  - {host.compiler: clang, target.compiler: clang}
+  - _operation: set
+
+true_cross:
+  - cross
+  - native
+  - _operation: difference
+```
+
+Both operands of the difference have the type
+`{host.compiler, target.compiler}`, and `true_cross` contains the two
+configurations whose host and target compilers differ.
 
 ## Mixing the forms
 
-A definition may flatten some sets and nest others, and the same set may be
-flattened in one definition and nested in another:
+A definition may reference some sets and nest others, and the same set may be
+referenced in one definition and nested in another:
 
 ```yaml
 resources:
   - nodes: [1, 2]
   - tasks_per_node: [4, 8]
-  - operation: product
+  - _operation: product
 
 job:
-  - flatten: resources
-  - build: {nested: build}
-  - operation: product
+  - resources
+  - build: {_nested: build}
+  - _operation: product
 ```
 
-The type of `job` is `{nodes, tasks_per_node, build}`.
+The type of `job` is `{nodes, tasks_per_node, build.compiler, build.mpi}`.
 
 ## Choosing between them
 
-Flatten a set when its keys are dimensions of the result in their own right:
-they are compared, filtered or combined with keys of other sets, and a consumer
-reads them directly. Nest a set when its configurations form a unit that is
-passed on as a whole, or when its keys would collide with keys of other
-operands.
+Reference a set when its keys are dimensions of the result in their own right
+and a consumer reads them at the top level. Nest a set when its configurations
+form a unit that is passed on as a whole, or when its keys would collide with
+the keys of other operands.

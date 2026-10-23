@@ -13,7 +13,7 @@ set operations: product, union, intersection and difference.
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
-  - operation: product
+  - _operation: product
 ```
 
 The definition `build` denotes the four configurations obtained by combining two
@@ -42,39 +42,38 @@ product and an explicit set:
 grid:
   - os: [ubuntu, macos]
   - python: ["3.10", "3.11", "3.12"]
-  - operation: product
+  - _operation: product
 
 excluded:
   - {os: macos, python: "3.10"}
   - {os: ubuntu, python: "3.12"}
-  - operation: set
+  - _operation: set
 
 matrix:
-  - flatten: grid
-  - flatten: excluded
-  - operation: difference
+  - grid
+  - excluded
+  - _operation: difference
 ```
 
 A description written this way is only as complex as the set it describes. Every
 intermediate set has a name and can be inspected on its own.
 
-## Flatten and nested
+## References and nesting
 
-Definitions refer to one another by name, and every reference states how the
-other set is used. A `flatten` operand merges the keys of the other set into the
-result. A `nested` value keeps each configuration of the other set whole, as the
-value of a single key.
+Definitions refer to one another by name. A bare name merges the other set into
+the result with its own keys. A `_nested` value places the other set under a
+key.
 
 ```yaml
 flat_jobs:
   - system: [jedi, jupiter]
-  - flatten: build
-  - operation: product
+  - build
+  - _operation: product
 
 nested_jobs:
   - system: [jedi, jupiter]
-  - build: {nested: build}
-  - operation: product
+  - build: {_nested: build}
+  - _operation: product
 ```
 
 Both definitions denote eight configurations, but of different types:
@@ -83,11 +82,21 @@ Both definitions denote eight configurations, but of different types:
 # flat_jobs, type {system, compiler, mpi}
 {system: jedi, compiler: gcc, mpi: openmpi}
 
-# nested_jobs, type {system, build}
+# nested_jobs, type {system, build.compiler, build.mpi}
 {system: jedi, build: {compiler: gcc, mpi: openmpi}}
 ```
 
-[Flatten and nested](language/composition.md) compares the two forms in detail.
+Nesting prefixes every key of the nested set with the key that holds it. The
+nested dictionary is how a configuration with the paths `build.compiler` and
+`build.mpi` is written. [References and nesting](language/composition.md)
+describes both forms in detail.
+
+## Language words
+
+Every word of the language begins with an underscore: `_operation`, `_nested`,
+`_literal` and `_interval`. Keys never do. A language word can therefore not be
+mistaken for a key, and new words can be added later without changing the
+meaning of existing documents.
 
 ## Where to go next
 
@@ -100,13 +109,13 @@ Both definitions denote eight configurations, but of different types:
 
 -   **[Formalism](formalism/index.md)**
 
-    Keys, values, configurations, types and configuration sets defined
+    Keys, paths, values, configurations, types and configuration sets defined
     mathematically, and the meaning of a document in those terms.
 
 -   **[Examples](examples.md)**
 
-    Complete documents for common tasks, from compiler matrices to build and run
-    sections.
+    Complete documents for common tasks, from compiler matrices to
+    cross-compilation.
 
 -   **[Design notes](design.md)**
 

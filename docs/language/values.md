@@ -7,25 +7,26 @@ SPDX-License-Identifier: Apache-2.0
 The value of an inline operand determines the configurations of the operand: one
 configuration per value. Scalars and lists cover the common cases. Three marked
 dictionaries cover integer ranges, uninterpreted data and the configurations of
-another set.
+another definition.
 
-| Value | Form | Values denoted |
+| Value | Form | Denotes |
 | --- | --- | --- |
-| scalar | `gcc`, `16`, `true`, `null` | the scalar |
+| scalar | `gcc`, `16`, `true` | the scalar |
 | list | `[gcc, clang]` | each element |
-| interval | `{interval: {start: a, stop: b, step: s}}` | the integers from `a` through `b` in steps of `s` |
-| literal | `{literal: data}` | `data`, uninterpreted |
-| nested | `{nested: name}` | each configuration of the set named `name` |
+| interval | `{_interval: {start: a, stop: b, step: s}}` | the integers from `a` through `b` in steps of `s` |
+| literal | `{_literal: data}` | `data`, uninterpreted |
+| nested | `{_nested: name}` | each configuration of `name`, under the path of the operand |
 
 ## Scalars
 
-A string, number, boolean or null is a scalar and denotes one value.
+A string, number or boolean is a scalar and denotes one value.
 
 ```yaml
 - threads: 8
 ```
 
-denotes the set `{threads: 8}` of one configuration.
+denotes the set `{threads: 8}` of one configuration. Null is not written
+directly; see [Null](#null).
 
 ## Lists
 
@@ -35,16 +36,16 @@ A list of scalars denotes each of its elements.
 - compiler: [gcc, clang]
 ```
 
-The elements must be scalars. A list that should be kept as one value is wrapped
-in `literal`. Duplicate elements denote the same value once, and an empty list
-denotes the empty set of type `{compiler}`.
+The elements must be scalars other than null. A list that should be kept as one
+value is wrapped in `_literal`. Duplicate elements denote the same value once,
+and an empty list denotes the empty set of type `{compiler}`.
 
 ## Interval
 
-`interval` denotes a finite range of integers. It is compact syntax for a list.
+`_interval` denotes a finite range of integers. It is compact syntax for a list.
 
 ```yaml
-- cores: {interval: {start: 16, stop: 32, step: 8}}
+- cores: {_interval: {start: 16, stop: 32, step: 8}}
 ```
 
 is equivalent to:
@@ -65,34 +66,38 @@ exactly. An interval with `start` equal to `stop` denotes one value.
 
 ## Literal
 
-`literal` marks its content as data. The content is any value of the data model,
-including lists and dictionaries, and is not interpreted as Keyso. A literal
-always denotes exactly one value.
+`_literal` marks its content as data. The content is any value of the data
+model, including lists, dictionaries and null, and is not interpreted as Keyso.
+A literal always denotes exactly one value.
 
 ```yaml
-- params: {literal: {nx: 128, ny: 128, solver: [cg, gmres]}}
+- params: {_literal: {nx: 128, ny: 128, solver: [cg, gmres]}}
 ```
 
 denotes the set of the single configuration:
 
 ```yaml
-{params: {nx: 128, ny: 128, solver: [cg, gmres]}}
+{params: {_literal: {nx: 128, ny: 128, solver: [cg, gmres]}}}
 ```
+
+Its type is `{params}`: the keys inside the literal are data, not paths. The
+configuration keeps the `_literal` marker when written out, so that it is not
+mistaken for one with the paths `params.nx`, `params.ny` and `params.solver`.
 
 ## Nested
 
-`nested` names another definition of the same document. Each configuration of
-that set becomes one value of the key.
+`_nested` names another definition of the same document. The operand denotes
+that set with every path prefixed by the path of the operand.
 
 ```yaml
 builds:
   - compiler: [gcc, clang]
   - optimization: [O2, O3]
-  - operation: product
+  - _operation: product
 
 matrix:
-  - build: {nested: builds}
-  - operation: product
+  - build: {_nested: builds}
+  - _operation: product
 ```
 
 denotes:
@@ -104,10 +109,23 @@ denotes:
 - {build: {compiler: clang, optimization: O3}}
 ```
 
-The type of `matrix` is `{build}`. The keys of `builds` are not part of it. To
-merge those keys into the result instead, use a [flatten
-operand](operands.md#flatten-operand); [Flatten and nested](composition.md)
-compares the two.
+The type of `matrix` is `{build.compiler, build.optimization}`. The named set
+must have at least one path, so that the key of the operand appears in the
+result. To merge the set into the result without a prefix, use a [reference
+operand](operands.md#reference-operand); [References and
+nesting](composition.md) compares the two.
+
+## Null
+
+Null is written `{_literal: null}`:
+
+```yaml
+- toolchain_file: {_literal: null}
+```
+
+A null value written directly is invalid. In YAML, a key with nothing after its
+colon is null, so this rule turns a stray colon into an error rather than a
+configuration with a null value.
 
 ## Plain dictionaries are invalid
 
@@ -118,11 +136,7 @@ invalid:
 - params: {nx: 128, ny: 128}
 ```
 
-A dictionary value must have exactly one key, and that key must be `interval`,
-`literal` or `nested`.
-
-## Values in configuration operands
-
-Under `set`, each operand is a complete configuration whose values are data. No
-value construct is interpreted there: lists and dictionaries are kept verbatim,
-and `interval`, `literal` and `nested` have no special meaning.
+A dictionary value must have exactly one key, and that key must be `_interval`,
+`_literal` or `_nested`. To assign values to the paths `params.nx` and
+`params.ny`, use two inline operands with dotted keys, or a configuration
+operand under `set`.

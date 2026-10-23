@@ -5,7 +5,9 @@
 
 // The macros follow the notation of the formalism.
 window.MathJax = {
+  loader: { load: ["[tex]/textmacros"] },
   tex: {
+    packages: { "[+]": ["textmacros"] },
     inlineMath: [["\\(", "\\)"]],
     displayMath: [["\\[", "\\]"]],
     processEscapes: true,
