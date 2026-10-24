@@ -9,7 +9,7 @@ construct with examples.
 
 ## Structure
 
-```text
+``` { .text .grammar title="Structure of a document" }
 document       = { name: definition, ... }       one or more definitions
 definition     = [ item, ... ]                    operands and one operation item
 item           = operation-item | operand

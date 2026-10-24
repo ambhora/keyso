@@ -16,7 +16,7 @@ the other definition; they differ in where its paths end up.
 
 The running example has a set of builds:
 
-```yaml
+``` { .yaml .keyso title="The running example" }
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
@@ -25,7 +25,7 @@ build:
 
 **Referenced** in a product, `build` contributes its paths unchanged:
 
-```yaml
+``` { .yaml .keyso title="build referenced" }
 run:
   - system: [jedi, jupiter]
   - build
@@ -34,7 +34,7 @@ run:
 
 The type of `run` is `{system, compiler, mpi}`:
 
-```yaml
+``` { .yaml .result title="Configurations of run" }
 - {system: jedi, compiler: gcc, mpi: openmpi}
 - {system: jedi, compiler: gcc, mpi: mpich}
 - ...
@@ -42,7 +42,7 @@ The type of `run` is `{system, compiler, mpi}`:
 
 **Nested** under a key, `build` contributes its paths below that key:
 
-```yaml
+``` { .yaml .keyso title="build nested" }
 run:
   - system: [jedi, jupiter]
   - build: {_nested: build}
@@ -51,7 +51,7 @@ run:
 
 The type of `run` is `{system, build.compiler, build.mpi}`:
 
-```yaml
+``` { .yaml .result title="Configurations of run" }
 - {system: jedi, build: {compiler: gcc, mpi: openmpi}}
 - {system: jedi, build: {compiler: gcc, mpi: mpich}}
 - ...
@@ -66,7 +66,7 @@ The key and the definition need not share a name;
 A nested value does not store configurations inside configurations. It prefixes
 paths. The nested `run` above is the same set as
 
-```yaml
+``` { .yaml .keyso title="The nested run with dotted keys" }
 run:
   - system: [jedi, jupiter]
   - build.compiler: [gcc, clang]
@@ -90,7 +90,7 @@ Under `product`, the paths of all operands must be anticoherent: no path may
 equal another or be a prefix of it. Prefixing keeps nested paths apart, so the
 same set can be nested twice under different keys:
 
-```yaml
+``` { .yaml .keyso title="One set nested twice" }
 toolchain:
   - compiler: [gcc, clang]
   - _operation: product
@@ -110,7 +110,7 @@ contribute `compiler`.
 A dotted key reaches into a nested position. This keeps set operations on nested
 sets short. The cross-compilation pairs without the native ones are:
 
-```yaml
+``` { .yaml .keyso title="Native pairs removed with dotted keys" }
 native:
   - {host.compiler: gcc, target.compiler: gcc}
   - {host.compiler: clang, target.compiler: clang}
@@ -131,7 +131,7 @@ configurations whose host and target compilers differ.
 A definition may reference some sets and nest others, and the same set may be
 referenced in one definition and nested in another:
 
-```yaml
+``` { .yaml .keyso title="Referencing and nesting together" }
 resources:
   - nodes: [1, 2]
   - tasks_per_node: [4, 8]

@@ -8,7 +8,7 @@ Complete documents for common tasks. Each example is valid on its own.
 
 ## Compiler matrix
 
-```yaml
+``` { .yaml .keyso title="Compiler matrix" }
 compiler_matrix:
   - compiler: [gcc, clang]
   - optimization: [O0, O2, O3]
@@ -19,7 +19,7 @@ Six configurations of type `{compiler, optimization}`.
 
 ## HPC run matrix
 
-```yaml
+``` { .yaml .keyso title="HPC run matrix" }
 runs:
   - system: [jedi, jupiter]
   - nodes: [1, 2, 4]
@@ -33,7 +33,7 @@ Thirty-six configurations of type
 
 ## Remove unsupported combinations
 
-```yaml
+``` { .yaml .keyso title="Grid without unsupported combinations" }
 candidates:
   - compiler: [gcc, clang]
   - optimization: [O0, O2]
@@ -51,7 +51,7 @@ builds:
 
 ## Add a special case to a grid
 
-```yaml
+``` { .yaml .keyso title="Grid with a special case" }
 grid:
   - compiler: [gcc, clang]
   - optimization: [O2, O3]
@@ -69,7 +69,7 @@ builds:
 
 ## Reuse one set in several others
 
-```yaml
+``` { .yaml .keyso title="One set reused in two definitions" }
 compilers:
   - compiler: [gcc, clang]
   - _operation: product
@@ -87,7 +87,7 @@ release_builds:
 
 ## Build and run sections, merged
 
-```yaml
+``` { .yaml .keyso title="Merged build and run sections" }
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
@@ -108,7 +108,7 @@ jobs:
 The type of `jobs` is `{system, compiler, mpi, nodes, tasks_per_node}`, and each
 of its thirty-two configurations is flat:
 
-```yaml
+``` { .yaml .result title="A configuration of jobs" }
 {system: jedi, compiler: gcc, mpi: openmpi, nodes: 1, tasks_per_node: 4}
 ```
 
@@ -116,7 +116,7 @@ of its thirty-two configurations is flat:
 
 With the same `build` and `run`:
 
-```yaml
+``` { .yaml .keyso title="Nested build and run sections" }
 jobs:
   - system: [jedi, jupiter]
   - build: {_nested: build}
@@ -127,7 +127,7 @@ jobs:
 The type of `jobs` is
 `{system, build.compiler, build.mpi, run.nodes, run.tasks_per_node}`:
 
-```yaml
+``` { .yaml .result title="A configuration of jobs" }
 {system: jedi, build: {compiler: gcc, mpi: openmpi}, run: {nodes: 1, tasks_per_node: 4}}
 ```
 
@@ -135,7 +135,7 @@ The type of `jobs` is
 
 A section can be built in place, without a separate definition:
 
-```yaml
+``` { .yaml .keyso title="A nested section from dotted keys" }
 jobs:
   - system: [jedi, jupiter]
   - run.nodes: [1, 2]
@@ -147,7 +147,7 @@ The type of `jobs` is `{system, run.nodes, run.tasks_per_node}`.
 
 ## Cross compilation
 
-```yaml
+``` { .yaml .keyso title="Cross compilation without native pairs" }
 toolchain:
   - compiler: [gcc, clang]
   - _operation: product
@@ -173,7 +173,7 @@ twice. `true_cross` contains the two pairs whose compilers differ.
 
 ## Parameters as data
 
-```yaml
+``` { .yaml .keyso title="Parameters as data" }
 cases:
   - mesh: {_literal: {nx: 128, ny: 128}}
   - solver: [cg, gmres]

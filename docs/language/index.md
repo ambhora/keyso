@@ -13,7 +13,7 @@ the same rules in mathematical form.
 A document is a dictionary. Its keys are **names** and its values are
 **definitions**. Every definition denotes one configuration set.
 
-```yaml
+``` { .yaml .keyso title="Shape of a definition" }
 <name>:
   - <operand>
   - <operand>
@@ -41,7 +41,7 @@ cannot assign a value both to `build` and to `build.compiler`.
 A configuration is written as a dictionary in which a path is either spelled out
 or nested. The dictionaries
 
-```yaml
+``` { .yaml .result title="Two spellings of one configuration" }
 {system: jedi, build: {compiler: gcc, mpi: openmpi}}
 {system: jedi, build.compiler: gcc, build.mpi: openmpi}
 ```

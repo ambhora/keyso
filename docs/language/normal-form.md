@@ -8,7 +8,7 @@ Every definition denotes a configuration set. When that set is not empty, it can
 be written as an explicit `set` of its configurations. This is the **normal
 form** of the definition.
 
-```yaml
+``` { .yaml .keyso title="A definition" }
 compiler_matrix:
   - compiler: [gcc, clang]
   - optimization: [O0, O2]
@@ -17,7 +17,7 @@ compiler_matrix:
 
 has the normal form:
 
-```yaml
+``` { .yaml .keyso title="Its normal form" }
 compiler_matrix:
   - {compiler: gcc, optimization: O0}
   - {compiler: gcc, optimization: O2}
@@ -46,7 +46,7 @@ form gives the same configuration.
 Value constructs are expanded in normal form. An interval becomes its integers
 and a list its elements:
 
-```yaml
+``` { .yaml .keyso title="A definition with an interval" }
 cores:
   - cores: {_interval: {start: 16, stop: 32, step: 8}}
   - _operation: product
@@ -54,7 +54,7 @@ cores:
 
 has the normal form:
 
-```yaml
+``` { .yaml .keyso title="Its normal form" }
 cores:
   - {cores: 16}
   - {cores: 24}
@@ -67,7 +67,7 @@ cores:
 A normal form mentions no other definition. Reference operands contribute their
 paths directly; nested values contribute prefixed paths.
 
-```yaml
+``` { .yaml .keyso title="Definitions with references" }
 build:
   - compiler: [gcc, clang]
   - _operation: product
@@ -85,7 +85,7 @@ nested:
 
 has the normal form:
 
-```yaml
+``` { .yaml .keyso title="Their normal forms" }
 build:
   - {compiler: gcc}
   - {compiler: clang}

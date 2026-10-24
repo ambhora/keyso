@@ -9,7 +9,7 @@ configuration assigns values to keys, such as a compiler and an MPI library for
 a build. A Keyso document builds sets of configurations from simple choices with
 set operations: product, union, intersection and difference.
 
-```yaml
+``` { .yaml .keyso title="A first definition" }
 build:
   - compiler: [gcc, clang]
   - mpi: [openmpi, mpich]
@@ -19,18 +19,25 @@ build:
 The definition `build` denotes the four configurations obtained by combining two
 compilers with two MPI libraries.
 
+Every code block on this site carries a label and a caption. **Keyso** marks
+documents and fragments of documents, **Configurations** marks the
+configurations a definition denotes, **Invalid** marks counterexamples, and
+**Not Keyso** marks other formats shown for comparison.
+
 ## Why set operations
 
-Configuration sets rarely form a full grid. A typical CI matrix starts from a
-grid and removes the combinations that do not apply:
+Configuration sets rarely form a full grid. A typical CI matrix, here a GitHub
+Actions workflow, starts from a grid and removes the combinations that do not
+apply:
 
-```yaml
-matrix:
-  os: [ubuntu, macos]
-  python: ["3.10", "3.11", "3.12"]
-  exclude:
-    - {os: macos, python: "3.10"}
-    - {os: ubuntu, python: "3.12"}
+``` { .yaml .foreign title="GitHub Actions workflow matrix" }
+strategy:
+  matrix:
+    os: [ubuntu, macos]
+    python: ["3.10", "3.11", "3.12"]
+    exclude:
+      - {os: macos, python: "3.10"}
+      - {os: ubuntu, python: "3.12"}
 ```
 
 The exclusions are a set difference written in an ad hoc form, and rule-based
@@ -38,7 +45,7 @@ alternatives hide the structure of the set behind conditions. Keyso makes the
 set operations themselves the language. The same matrix is the difference of a
 product and an explicit set:
 
-```yaml
+``` { .yaml .keyso title="The same matrix in Keyso" }
 grid:
   - os: [ubuntu, macos]
   - python: ["3.10", "3.11", "3.12"]
@@ -64,7 +71,7 @@ Definitions refer to one another by name. A bare name merges the other set into
 the result with its own keys. A `_nested` value places the other set under a
 key.
 
-```yaml
+``` { .yaml .keyso title="A set referenced and nested" }
 flat_jobs:
   - system: [jedi, jupiter]
   - build
@@ -78,7 +85,7 @@ nested_jobs:
 
 Both definitions denote eight configurations, but of different types:
 
-```yaml
+``` { .yaml .result title="One configuration of each" }
 # flat_jobs, type {system, compiler, mpi}
 {system: jedi, compiler: gcc, mpi: openmpi}
 

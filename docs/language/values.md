@@ -21,7 +21,7 @@ another definition.
 
 A string, number or boolean is a scalar and denotes one value.
 
-```yaml
+``` { .yaml .keyso title="A scalar value" }
 - threads: 8
 ```
 
@@ -32,7 +32,7 @@ directly; see [Null](#null).
 
 A list of scalars denotes each of its elements.
 
-```yaml
+``` { .yaml .keyso title="A list value" }
 - compiler: [gcc, clang]
 ```
 
@@ -44,13 +44,13 @@ and an empty list denotes the empty set of type `{compiler}`.
 
 `_interval` denotes a finite range of integers. It is compact syntax for a list.
 
-```yaml
+``` { .yaml .keyso title="An interval" }
 - cores: {_interval: {start: 16, stop: 32, step: 8}}
 ```
 
 is equivalent to:
 
-```yaml
+``` { .yaml .keyso title="The equivalent list" }
 - cores: [16, 24, 32]
 ```
 
@@ -70,13 +70,13 @@ exactly. An interval with `start` equal to `stop` denotes one value.
 model, including lists, dictionaries and null, and is not interpreted as Keyso.
 A literal always denotes exactly one value.
 
-```yaml
+``` { .yaml .keyso title="A literal" }
 - params: {_literal: {nx: 128, ny: 128, solver: [cg, gmres]}}
 ```
 
 denotes the set of the single configuration:
 
-```yaml
+``` { .yaml .result title="Configuration of the operand" }
 {params: {_literal: {nx: 128, ny: 128, solver: [cg, gmres]}}}
 ```
 
@@ -89,7 +89,7 @@ mistaken for one with the paths `params.nx`, `params.ny` and `params.solver`.
 `_nested` names another definition of the same document. The operand denotes
 that set with every path prefixed by the path of the operand.
 
-```yaml
+``` { .yaml .keyso title="A nested value" }
 builds:
   - compiler: [gcc, clang]
   - optimization: [O2, O3]
@@ -102,7 +102,7 @@ matrix:
 
 denotes:
 
-```yaml
+``` { .yaml .result title="Configurations of matrix" }
 - {build: {compiler: gcc, optimization: O2}}
 - {build: {compiler: gcc, optimization: O3}}
 - {build: {compiler: clang, optimization: O2}}
@@ -119,7 +119,7 @@ nesting](composition.md) compares the two.
 
 Null is written `{_literal: null}`:
 
-```yaml
+``` { .yaml .keyso title="A literal null" }
 - toolchain_file: {_literal: null}
 ```
 
@@ -132,7 +132,7 @@ configuration with a null value.
 An unmarked dictionary is ambiguous: it could be data or a construct. This is
 invalid:
 
-```yaml
+``` { .yaml .invalid title="A plain dictionary value" }
 - params: {nx: 128, ny: 128}
 ```
 

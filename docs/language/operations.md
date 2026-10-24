@@ -26,7 +26,7 @@ no path of one equals a path of the other or is a prefix of it. The types
 `product` combines anticoherent sets. Each configuration of the result joins one
 configuration of every operand.
 
-```yaml
+``` { .yaml .keyso title="Product" }
 compiler_matrix:
   - compiler: [gcc, clang]
   - optimization: [O0, O2]
@@ -35,7 +35,7 @@ compiler_matrix:
 
 denotes:
 
-```yaml
+``` { .yaml .result title="Configurations of compiler_matrix" }
 - {compiler: gcc, optimization: O0}
 - {compiler: gcc, optimization: O2}
 - {compiler: clang, optimization: O0}
@@ -47,7 +47,7 @@ single operand is that operand. The requirement covers the paths contributed by
 reference operands and nested values. This is invalid, because both operands
 contain `compiler`:
 
-```yaml
+``` { .yaml .invalid title="Operands with a shared key" }
 invalid:
   - compiler: [gcc, clang]
   - compiler: [gcc, intel]
@@ -56,7 +56,7 @@ invalid:
 
 Paths below a common key are combined like any other paths:
 
-```yaml
+``` { .yaml .keyso title="Paths below a common key" }
 run:
   - run.nodes: [1, 2]
   - run.tasks_per_node: [4, 8]
@@ -71,7 +71,7 @@ denotes four configurations of type `{run.nodes, run.tasks_per_node}`, such as
 `union` combines coherent sets. The result contains every configuration of every
 operand.
 
-```yaml
+``` { .yaml .keyso title="Union" }
 compilers:
   - compiler: [gcc, clang]
   - compiler: [clang, intel]
@@ -80,7 +80,7 @@ compilers:
 
 denotes:
 
-```yaml
+``` { .yaml .result title="Configurations of compilers" }
 - {compiler: gcc}
 - {compiler: clang}
 - {compiler: intel}
@@ -91,7 +91,7 @@ denotes:
 `intersection` combines coherent sets. The result contains the configurations
 present in every operand.
 
-```yaml
+``` { .yaml .keyso title="Intersection" }
 common:
   - compiler: [gcc, clang]
   - compiler: [clang, intel]
@@ -100,7 +100,7 @@ common:
 
 denotes:
 
-```yaml
+``` { .yaml .result title="Configurations of common" }
 - {compiler: clang}
 ```
 
@@ -110,7 +110,7 @@ denotes:
 of the second from the first. The order of the operands is significant: the
 first is the minuend and the second the subtrahend.
 
-```yaml
+``` { .yaml .keyso title="Difference" }
 remaining:
   - compiler: [gcc, clang, intel]
   - compiler: [clang]
@@ -119,7 +119,7 @@ remaining:
 
 denotes:
 
-```yaml
+``` { .yaml .result title="Configurations of remaining" }
 - {compiler: gcc}
 - {compiler: intel}
 ```
@@ -132,7 +132,7 @@ To subtract several sets, define their union and use it as the subtrahend.
 operands](operands.md#configuration-operand), and all of them must have the same
 type.
 
-```yaml
+``` { .yaml .keyso title="An explicit set" }
 supported:
   - {compiler: gcc, optimization: O2}
   - {compiler: clang, optimization: O3}
@@ -145,7 +145,7 @@ is contained once.
 
 This is invalid, because the two configurations have different types:
 
-```yaml
+``` { .yaml .invalid title="Configurations of different types" }
 mixed:
   - {compiler: gcc}
   - {compiler: clang, optimization: O2}
@@ -156,7 +156,7 @@ mixed:
 
 An operation may produce an empty set. The empty set still has a type:
 
-```yaml
+``` { .yaml .keyso title="An empty difference" }
 none:
   - compiler: [gcc]
   - compiler: [gcc]
