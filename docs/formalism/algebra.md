@@ -74,7 +74,7 @@ anticoherent, while
 $\langle \{\texttt{build}\}, \{\texttt{build.mpi}\} \rangle = \{\texttt{build}\}$.
 The empty type is coherent with itself and anticoherent with every type.
 
-!!! proposition "Proposition 1: Union of anticoherent types"
+!!! theorem "Theorem 1: Union of anticoherent types"
 
     If $T_1$ and $T_2$ are anticoherent, then $T_1 \cap T_2 = \varnothing$ and
     $T_1 \cup T_2$ is a type.
@@ -135,11 +135,11 @@ written `{system: jedi, build: {compiler: gcc}}`.
     a configuration of type $\calT(c_1) \cup \calT(c_2)$. The product extends
     $c_1$ by $c_2$.
 
-By Proposition 1, the union of the types is a type and no path appears twice, so
+By Theorem 1, the union of the types is a type and no path appears twice, so
 the product is a configuration. It is commutative and associative, and the empty
 configuration is its unit.
 
-!!! proposition "Proposition 2: Projection and product are inverse"
+!!! theorem "Theorem 2: Projection and product are inverse"
 
     For a configuration $c$ and a type $T \leq \calT(c)$,
 
@@ -175,7 +175,7 @@ configuration is its unit.
     For a path $q$, the **part of $c$ below $q$** is
     $c \mathbin{/\!/} q = \{\, (p, v) \mid (q.p, v) \in c \,\}$.
 
-!!! proposition "Proposition 3: Prefixing"
+!!! theorem "Theorem 3: Prefixing"
 
     For every $q \in \calK^{*}$:
 
@@ -231,7 +231,7 @@ $(\{\texttt{system}\}, \varnothing)$ are different configuration sets.
     \prod_{i=1}^{n} (T_i, S_i) = \Bigl(\, \bigcup_{i=1}^{n} T_i,\; \{\, c_1 \times \dots \times c_n \mid c_i \in S_i \,\} \Bigr).
     $$
 
-!!! proposition "Proposition 4: Size and laws of the product"
+!!! theorem "Theorem 4: Size and laws of the product"
 
     For anticoherent configuration sets $S_1$ and $S_2$,
 
@@ -243,7 +243,7 @@ $(\{\texttt{system}\}, \varnothing)$ are different configuration sets.
     $(\varnothing, \{\varnothing\})$, and the product with an empty
     configuration set is empty.
 
-    *Proof.* By Proposition 2, the map $c \mapsto (\pi(c; T_1), \pi(c; T_2))$ is
+    *Proof.* By Theorem 2, the map $c \mapsto (\pi(c; T_1), \pi(c; T_2))$ is
     a bijection from $S_1 \times S_2$ onto the Cartesian product of $S_1$ and
     $S_2$, with inverse $(c_1, c_2) \mapsto c_1 \times c_2$. The laws follow
     from those of the product of configurations. $\square$
@@ -303,7 +303,7 @@ Nesting under the empty sequence is the identity,
 $\varepsilon \cdot (T, S) = (T, S)$. Using a set as it is and placing it under a
 key are therefore one operation with different prefixes.
 
-!!! proposition "Proposition 5: Nesting is a homomorphism"
+!!! theorem "Theorem 5: Nesting is a homomorphism"
 
     For every $q \in \calK^{*}$:
 
@@ -317,8 +317,8 @@ key are therefore one operation with different prefixes.
     4. For a path $p$ and values $A$, $q \cdot [p \mapsto A] = [q.p \mapsto A]$.
 
     *Proof.* The first item holds because prefixing is injective on
-    configurations, by Proposition 3. The second follows from the fourth item of
-    Proposition 3, applied to every pair of configurations. The third holds
+    configurations, by Theorem 3. The second follows from the fourth item of
+    Theorem 3, applied to every pair of configurations. The third holds
     because an injective map commutes with union, intersection and difference of
     sets. The fourth is immediate from the definitions. $\square$
 

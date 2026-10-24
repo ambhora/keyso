@@ -110,7 +110,7 @@ and in the second case the part of $c$ below $k$ is non-empty.
     when $\mathrm{read}(d)$ is a configuration: its paths are distinct and form
     a type.
 
-!!! proposition "Proposition 6: Reading inverts writing"
+!!! theorem "Theorem 6: Reading inverts writing"
 
     For every non-empty configuration $c$, $\mathrm{read}(\rho(c)) = c$. In
     particular, $\rho$ is injective.
@@ -191,7 +191,7 @@ configuration set its definition denotes.
 
 A reference operand and a nested operand are both nestings in the sense of
 Definition 15, with the empty prefix and with the path of the operand. By
-Proposition 5, an inline operand with a dotted key is the nesting of an inline
+Theorem 5, an inline operand with a dotted key is the nesting of an inline
 operand with a plain key:
 $\sem{\{\texttt{run.nodes}: v\}} = \texttt{run} \cdot \sem{\{\texttt{nodes}: v\}}$.
 
@@ -232,7 +232,7 @@ $\sem{\{\texttt{run.nodes}: v\}} = \texttt{run} \cdot \sem{\{\texttt{nodes}: v\}
 
     where $c_1, \dots, c_{|S|}$ are the configurations of $S$ in any order.
 
-By Proposition 6, the normal form of a definition is equivalent to it, and two
+By Theorem 6, the normal form of a definition is equivalent to it, and two
 definitions with non-empty sets are equivalent exactly when their normal forms
 contain the same written configurations. A definition whose set is empty has no
 normal form, because a $\texttt{set}$ needs at least one configuration to

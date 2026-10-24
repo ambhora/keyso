@@ -3,20 +3,20 @@
 /* SPDX-FileCopyrightText: 2026 keyso developers                              */
 /* -------------------------------------------------------------------------- */
 
-/* Definitions and propositions of the formalism: the background carries the
+/* Definitions and theorems of the formalism: the background carries the
    colour, the text stays black or white, and the title has no icon. */
 :root {
   --keyso-definition: #e8eaf6;
-  --keyso-proposition: #e8f5e9;
+  --keyso-theorem: #e8f5e9;
 }
 
 [data-md-color-scheme="slate"] {
   --keyso-definition: #262a40;
-  --keyso-proposition: #233026;
+  --keyso-theorem: #233026;
 }
 
 .md-typeset .admonition.definition,
-.md-typeset .admonition.proposition {
+.md-typeset .admonition.theorem {
   border: none;
   box-shadow: none;
   font-size: inherit;
@@ -26,18 +26,18 @@
   background-color: var(--keyso-definition);
 }
 
-.md-typeset .admonition.proposition {
-  background-color: var(--keyso-proposition);
+.md-typeset .admonition.theorem {
+  background-color: var(--keyso-theorem);
 }
 
 .md-typeset .definition > .admonition-title,
-.md-typeset .proposition > .admonition-title {
+.md-typeset .theorem > .admonition-title {
   background-color: transparent;
   padding-left: 0.6rem;
 }
 
 .md-typeset .definition > .admonition-title::before,
-.md-typeset .proposition > .admonition-title::before {
+.md-typeset .theorem > .admonition-title::before {
   display: none;
 }
 
