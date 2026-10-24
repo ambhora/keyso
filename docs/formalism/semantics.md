@@ -30,26 +30,33 @@ serialization.
     Two data are equal when they are structurally equal: scalars by value, lists
     element by element, and dictionaries key by key.
 
-## Language words
+## Language words and references
 
-!!! definition "Definition 17: Language words"
+!!! definition "Definition 17: Language words and references"
 
     A **language word** is a string that begins with $\texttt{\_}$. The words in
-    use are $\texttt{\_operation}$, $\texttt{\_nested}$, $\texttt{\_literal}$
-    and $\texttt{\_interval}$. The **operation names** are
+    use are $\texttt{\_operation}$, $\texttt{\_literal}$ and
+    $\texttt{\_interval}$. The **operation names** are
     $\calO = \{\texttt{product}, \texttt{union}, \texttt{intersection}, \texttt{difference}, \texttt{set}\}$.
+
+    A **reference** is a string that begins with
+    $\texttt{\$}$. The reference $\texttt{\$}m$ **names** $m$.
 
 Every language word is reserved, including the words not yet in use. A later
 version of the language can therefore add a word without changing the meaning of
-any valid document.
+any valid document. Every string beginning with $\texttt{\$}$ is likewise
+reserved for references, and is invalid wherever a reference is not allowed.
 
 ## Keys, paths and values of Keyso
 
 !!! definition "Definition 18: Keys and values"
 
     In Keyso, the set of keys $\calK \subseteq \Sigma$ contains the non-empty
-    strings that do not begin with $\texttt{\_}$ and do not contain
-    $\texttt{.}$, and the values are the data, $\calV = \calD$.
+    strings that begin with neither $\texttt{\_}$ nor
+    $\texttt{\$}$ and do not contain $\texttt{.}$, and the values are the data, $\calV
+    =
+    \calD$. A **plain scalar** is a scalar other than $\texttt{null}$ that is not a reference; the plain scalars form the set $\calA_0
+    \subseteq \calA$.
 
     A path $(k_1, \dots, k_n)$ is written as the string $k_1.k_2.\cdots.k_n$. A
     **path string** is a string written this way.
@@ -69,8 +76,8 @@ dictionaries and null are marked.
     $$
     \rho(v) =
     \begin{cases}
-    v & \text{if } v \text{ is a list, or a scalar other than } \texttt{null}, \\
-    \{\texttt{\_literal}: v\} & \text{if } v \text{ is a dictionary or } \texttt{null}.
+    v & \text{if } v \text{ is a list or a plain scalar}, \\
+    \{\texttt{\_literal}: v\} & \text{otherwise}.
     \end{cases}
     $$
 
@@ -100,13 +107,14 @@ and in the second case the part of $c$ below $k$ is non-empty.
     $$
     \mathrm{read}(p, e) =
     \begin{cases}
-    \{(p, e)\} & \text{if } e \text{ is a list, or a scalar other than } \texttt{null}, \\
+    \{(p, e)\} & \text{if } e \text{ is a list or a plain scalar}, \\
     \{(p, x)\} & \text{if } e = \{\texttt{\_literal}: x\}, \\
     p \cdot \mathrm{read}(e) & \text{if } e \text{ is a non-empty dictionary of path strings}.
     \end{cases}
     $$
 
-    Every other entry is invalid. The dictionary is a **configuration operand**
+    Every other entry is invalid, in particular $\texttt{null}$ and every
+    reference. The dictionary is a **configuration operand**
     when $\mathrm{read}(d)$ is a configuration: its paths are distinct and form
     a type.
 
@@ -116,7 +124,7 @@ and in the second case the part of $c$ below $k$ is non-empty.
     particular, $\rho$ is injective.
 
     *Proof.* By induction on the length of the longest path of $c$. A written
-    value is a list, a scalar other than $\texttt{null}$, or a dictionary whose
+    value is a list, a plain scalar, or a dictionary whose
     only key $\texttt{\_literal}$ is not a path string, so $\mathrm{read}$ takes
     the first two cases exactly for written values and recovers the value. A
     written part $\rho(c \mathbin{/\!/} k)$ is a dictionary of path strings,
@@ -140,12 +148,10 @@ as.
 
     The **reference graph** of $\delta$ has the names of $\delta$ as vertices
     and an edge from $n$ to $m$ when the definition of $n$ contains the
-    reference operand $m$ or an inline operand with the value
-    $\{\texttt{\_nested}: m\}$.
+    reference $\texttt{\$}m$, as an operand or as the value of an entry.
 
-    The document is **well formed** when every name used in a reference operand
-    or a $\texttt{\_nested}$ value is a name of $\delta$ and the reference graph
-    has no cycle.
+    The document is **well formed** when every reference in it names a name of
+    $\delta$ and the reference graph has no cycle.
 
 In a well-formed document, the definitions can be evaluated in an order in which
 every definition follows the definitions it refers to. The definitions below are
@@ -162,16 +168,16 @@ configuration set its definition denotes.
 
     | Value $v$ | $\mathrm{val}(v)$ | Condition |
     | --- | --- | --- |
-    | $a$ | $\{a\}$ | $a \in \calA$, $a \neq \texttt{null}$ |
-    | $(a_1, \dots, a_n)$ | $\{a_1, \dots, a_n\}$ | $a_i \in \calA$, $a_i \neq \texttt{null}$ |
+    | $a$ | $\{a\}$ | $a \in \calA_0$ |
+    | $(a_1, \dots, a_n)$ | $\{a_1, \dots, a_n\}$ | $a_i \in \calA_0$ |
     | $\{\texttt{\_interval}: \{\texttt{start}: s, \texttt{stop}: e, \texttt{step}: r\}\}$ | $\{\, s + i r \mid i \in \mathbb{N},\; s + i r \leq e \,\}$ | $s, e \in \mathbb{Z}$, $s \leq e$, $r \in \mathbb{Z}$, $r \geq 1$ |
     | $\{\texttt{\_literal}: d\}$ | $\{d\}$ | $d \in \calD$ |
 
-    In an interval, the field $\texttt{step}$ may be omitted and then $r = 1$.
-    The value $\{\texttt{\_nested}: m\}$ is treated in Definition 23. Every
-    other value is invalid; in particular, $\texttt{null}$ and every dictionary
-    that is not a single language-word entry of this table or of
-    $\texttt{\_nested}$.
+    In an interval, the field $\texttt{step}$ may be omitted and then $r = 1$. A
+    reference is not a value: an entry whose value is a reference is a keyed
+    reference, Definition 23. Every other value is invalid; in particular
+    $\texttt{null}$, and every dictionary that is not a single language-word
+    entry of this table.
 
 ## Operands
 
@@ -182,15 +188,16 @@ configuration set its definition denotes.
 
     | Operand | Denotes | Condition |
     | --- | --- | --- |
-    | reference operand $m$ | $\varepsilon \cdot \sem{m} = \sem{m}$ | $m$ a name of $\delta$ |
-    | $\{s: \{\texttt{\_nested}: m\}\}$ | $p_s \cdot \sem{m}$ | $m$ a name of $\delta$, $T_m \neq \varnothing$ |
-    | $\{s: v\}$, any other value | $[p_s \mapsto \mathrm{val}(v)]$ | $v$ valid |
+    | reference operand $\texttt{\$}m$ | $\varepsilon \cdot \sem{m} = \sem{m}$ | $m$ a name of $\delta$ |
+    | keyed reference $\{s: \texttt{\$}m\}$ | $p_s \cdot \sem{m}$ | $m$ a name of $\delta$, $T_m \neq \varnothing$ |
+    | inline operand $\{s: v\}$ | $[p_s \mapsto \mathrm{val}(v)]$ | $v$ a value of Definition 22 |
 
     Here $s$ is a path string and $p_s$ its path. Under $\texttt{set}$, a
     configuration operand $d$ denotes the configuration $\mathrm{read}(d)$.
 
-A reference operand and a nested operand are both nestings in the sense of
-Definition 15, with the empty prefix and with the path of the operand. By
+Both kinds of reference are nestings in the sense of Definition 15: a reference
+denotes the named set nested under the path where it is written, and a reference
+operand is written at the empty path. By
 Theorem 5, an inline operand with a dotted key is the nesting of an inline
 operand with a plain key:
 $\sem{\{\texttt{run.nodes}: v\}} = \texttt{run} \cdot \sem{\{\texttt{nodes}: v\}}$.
@@ -211,8 +218,9 @@ $\sem{\{\texttt{run.nodes}: v\}} = \texttt{run} \cdot \sem{\{\texttt{nodes}: v\}
     | $\texttt{set}$ | $(T, \{\mathrm{read}(x_1), \dots, \mathrm{read}(x_r)\})$ | $r \geq 1$, every $x_i$ a configuration operand of type $T$ |
 
     Under $\texttt{product}$, $\texttt{union}$, $\texttt{intersection}$ and
-    $\texttt{difference}$, every operand is a reference operand or an inline
-    operand. Under $\texttt{set}$, every operand is a configuration operand.
+    $\texttt{difference}$, every operand is a reference operand, a keyed
+    reference or an inline operand. Under $\texttt{set}$, every operand is a
+    configuration operand.
 
     A definition is **valid** when its operands are valid and its requirement
     holds. A document is **valid** when it is well formed and all its

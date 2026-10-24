@@ -57,29 +57,30 @@ excluded:
   - _operation: set
 
 matrix:
-  - grid
-  - excluded
+  - $grid
+  - $excluded
   - _operation: difference
 ```
 
 A description written this way is only as complex as the set it describes. Every
 intermediate set has a name and can be inspected on its own.
 
-## References and nesting
+## References
 
-Definitions refer to one another by name. A bare name merges the other set into
-the result with its own keys. A `_nested` value places the other set under a
-key.
+Definitions refer to one another with `$` and a name. Where a reference is
+written decides what it denotes. As an operand of its own, `- $build` merges the
+set of `build` into the result with its own keys. As the value of a key,
+`- build: $build` places the set under that key.
 
 ``` { .yaml .keyso title="A set referenced and nested" }
 flat_jobs:
   - system: [jedi, jupiter]
-  - build
+  - $build
   - _operation: product
 
 nested_jobs:
   - system: [jedi, jupiter]
-  - build: {_nested: build}
+  - build: $build
   - _operation: product
 ```
 
@@ -93,17 +94,18 @@ Both definitions denote eight configurations, but of different types:
 {system: jedi, build: {compiler: gcc, mpi: openmpi}}
 ```
 
-Nesting prefixes every key of the nested set with the key that holds it. The
-nested dictionary is how a configuration with the paths `build.compiler` and
-`build.mpi` is written. [References and nesting](language/composition.md)
-describes both forms in detail.
+Placing a set under a key prefixes each of its keys with that key. The nested
+dictionary is how a configuration with the paths `build.compiler` and
+`build.mpi` is written. [References](language/references.md) describes both
+positions in detail.
 
-## Language words
+## Two prefixes
 
-Every word of the language begins with an underscore: `_operation`, `_nested`,
-`_literal` and `_interval`. Keys never do. A language word can therefore not be
-mistaken for a key, and new words can be added later without changing the
-meaning of existing documents.
+Two prefixes keep the parts of a document apart. Every word of the language
+begins with `_`: `_operation`, `_literal` and `_interval`. Every reference to a
+definition begins with `$`. Keys never begin with either, so neither a language
+word nor a reference can be mistaken for a key. New words can be added later
+without changing the meaning of existing documents.
 
 ## Where to go next
 

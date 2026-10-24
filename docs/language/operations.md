@@ -44,7 +44,7 @@ denotes:
 
 The type of the result is the union of the operand types, and the product of a
 single operand is that operand. The requirement covers the paths contributed by
-reference operands and nested values. This is invalid, because both operands
+references, in both positions. This is invalid, because both operands
 contain `compiler`:
 
 ``` { .yaml .invalid title="Operands with a shared key" }

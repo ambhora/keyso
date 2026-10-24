@@ -34,11 +34,14 @@ appears once.
 In a normal form, every configuration is written as a configuration operand:
 
 - paths are written nested, one dictionary level per key;
-- a value that is a scalar other than null, or a list, is written as it is;
-- a value that is a dictionary or null is written as `{_literal: value}`.
+- a value that is a list, or a scalar other than null that does not begin with
+  `$`, is written as it is;
+- every other value, a dictionary, null or a string beginning with `$`, is
+  written as `{_literal: value}`.
 
 The `_literal` marker keeps a dictionary value apart from the nested paths it
-would otherwise be read as. Read back as a configuration operand, the written
+would otherwise be read as, and a string beginning with `$` apart from a
+reference. Read back as a configuration operand, the written
 form gives the same configuration.
 
 ## Value constructs
@@ -65,7 +68,7 @@ cores:
 ## References
 
 A normal form mentions no other definition. Reference operands contribute their
-paths directly; nested values contribute prefixed paths.
+paths directly; references under a key contribute prefixed paths.
 
 ``` { .yaml .keyso title="Definitions with references" }
 build:
@@ -73,12 +76,12 @@ build:
   - _operation: product
 
 flat:
-  - build
+  - $build
   - system: [jedi, jupiter]
   - _operation: product
 
 nested:
-  - build: {_nested: build}
+  - build: $build
   - system: [jedi, jupiter]
   - _operation: product
 ```

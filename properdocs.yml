@@ -82,7 +82,7 @@ nav:
       - Operands: language/operands.md
       - Values: language/values.md
       - Operations: language/operations.md
-      - References and nesting: language/composition.md
+      - References: language/references.md
       - Normal form: language/normal-form.md
       - Reference: language/reference.md
   - Formalism:

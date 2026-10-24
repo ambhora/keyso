@@ -44,8 +44,8 @@ unsupported:
   - _operation: set
 
 builds:
-  - candidates
-  - unsupported
+  - $candidates
+  - $unsupported
   - _operation: difference
 ```
 
@@ -62,8 +62,8 @@ special:
   - _operation: set
 
 builds:
-  - grid
-  - special
+  - $grid
+  - $special
   - _operation: union
 ```
 
@@ -75,12 +75,12 @@ compilers:
   - _operation: product
 
 debug_builds:
-  - compilers
+  - $compilers
   - optimization: O0
   - _operation: product
 
 release_builds:
-  - compilers
+  - $compilers
   - optimization: [O2, O3]
   - _operation: product
 ```
@@ -100,8 +100,8 @@ run:
 
 jobs:
   - system: [jedi, jupiter]
-  - build
-  - run
+  - $build
+  - $run
   - _operation: product
 ```
 
@@ -112,15 +112,15 @@ of its thirty-two configurations is flat:
 {system: jedi, compiler: gcc, mpi: openmpi, nodes: 1, tasks_per_node: 4}
 ```
 
-## Build and run sections, nested
+## Build and run sections under keys
 
 With the same `build` and `run`:
 
 ``` { .yaml .keyso title="Nested build and run sections" }
 jobs:
   - system: [jedi, jupiter]
-  - build: {_nested: build}
-  - run: {_nested: run}
+  - build: $build
+  - run: $run
   - _operation: product
 ```
 
@@ -153,8 +153,8 @@ toolchain:
   - _operation: product
 
 cross:
-  - host: {_nested: toolchain}
-  - target: {_nested: toolchain}
+  - host: $toolchain
+  - target: $toolchain
   - _operation: product
 
 native:
@@ -163,13 +163,14 @@ native:
   - _operation: set
 
 true_cross:
-  - cross
-  - native
+  - $cross
+  - $native
   - _operation: difference
 ```
 
-The same set is nested twice; referencing it twice would contribute `compiler`
-twice. `true_cross` contains the two pairs whose compilers differ.
+The same set is placed under two keys; using `$toolchain` twice as an operand
+would contribute `compiler` twice. `true_cross` contains the two pairs whose
+compilers differ.
 
 ## Parameters as data
 

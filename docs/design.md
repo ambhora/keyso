@@ -23,21 +23,31 @@ reused and tested on its own, and an error points to a named definition rather
 than a position deep inside an expression. Each definition names exactly one
 operation, so it reads like one equation of the algebra.
 
-## A reserved prefix
+## Two reserved prefixes
 
-Every word of the language begins with `_`, and keys never do. A language word
-cannot be mistaken for a key, wherever it appears. Reserving a prefix rather
-than individual words also means that a later version can add a word without
-changing the meaning of any valid document. An earlier draft used plain words
-such as `operation` and `flatten`; in operand position they looked like ordinary
-keys.
+Every word of the language begins with `_`, every reference to a definition
+begins with `$`, and keys begin with neither. A language word or a reference can
+therefore not be mistaken for a key, wherever it appears. Reserving a prefix
+rather than individual words also means that a later version can add a word
+without changing the meaning of any valid document. An earlier draft used plain
+words such as `operation` and `flatten`; in operand position they looked like
+ordinary keys.
 
-## One way to refer, one way to nest
+## One construct for references
 
-A bare name uses another set as it is. A `_nested` value places it under a key.
-The two are told apart by their shape: a name is a string and an inline operand
-is a dictionary. In the algebra both are nestings, the first with the empty
-prefix, so the language needs no word for the first.
+A reference `$name` denotes the named set nested under the path where it is
+written. As an operand it is written at the empty path and merges the set
+unchanged; as the value of a key it places the set under that key. In the
+algebra both are nestings, so the language needs a single construct. Earlier
+drafts used a bare name for the first position and a `_nested` marker for the
+second; a bare name looked like a value, and the marker described a reference as
+if it were a value.
+
+The cost of the `$` prefix is that a value cannot begin with `$` unmarked.
+Environment variables such as `$SCRATCH` are common in configurations, so such
+data is written with `_literal`. A `$` string in any other position is an error,
+never a silent change of meaning, and Keyso has no interpolation that would make
+`$a/$b` a template.
 
 ## Paths
 
@@ -52,16 +62,18 @@ where a set operation needs them.
 
 A dictionary in a document is either a construct to interpret or data to keep.
 Keyso never guesses. In an inline operand, every dictionary value is marked as
-`_interval`, `_literal` or `_nested`. In a configuration operand, a dictionary
+`_interval` or `_literal`. In a configuration operand, a dictionary
 describes paths and a dictionary value is marked with `_literal`. Normal forms
 keep the marker, so writing a configuration and reading it back gives the same
 configuration.
 
 ## No bare null
 
-In YAML, a key with nothing after its colon is null. A reference operand written
-with a stray colon, `- build:` instead of `- build`, would otherwise be a valid
-operand with a null value. Requiring `{_literal: null}` makes the slip an error.
+In YAML, a key with nothing after its colon is null. An inline operand written
+with a stray colon, `- compiler:` with its values forgotten, would otherwise be
+a valid operand with a null value. Requiring `{_literal: null}` makes the slip
+an error. The same slip on a reference, `- $build:`, fails twice: the key begins
+with `$` and its value is null.
 
 ## Typed empty sets
 

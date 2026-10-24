@@ -5,9 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 # Values
 
 The value of an inline operand determines the configurations of the operand: one
-configuration per value. Scalars and lists cover the common cases. Three marked
-dictionaries cover integer ranges, uninterpreted data and the configurations of
-another definition.
+configuration per value. Scalars and lists cover the common cases. Two marked
+dictionaries cover integer ranges and uninterpreted data.
 
 | Value | Form | Denotes |
 | --- | --- | --- |
@@ -15,7 +14,10 @@ another definition.
 | list | `[gcc, clang]` | each element |
 | interval | `{_interval: {start: a, stop: b, step: s}}` | the integers from `a` through `b` in steps of `s` |
 | literal | `{_literal: data}` | `data`, uninterpreted |
-| nested | `{_nested: name}` | each configuration of `name`, under the path of the operand |
+
+A string beginning with `$` is not a value. As the value of an entry it makes
+the operand a [keyed reference](operands.md#keyed-reference), which denotes the
+configurations of another definition rather than values.
 
 ## Scalars
 
@@ -25,8 +27,9 @@ A string, number or boolean is a scalar and denotes one value.
 - threads: 8
 ```
 
-denotes the set `{threads: 8}` of one configuration. Null is not written
-directly; see [Null](#null).
+denotes the set `{threads: 8}` of one configuration. A string written as a
+scalar must not begin with `$`, and null is not written directly; see [Strings
+beginning with `$`](#strings-beginning-with) and [Null](#null).
 
 ## Lists
 
@@ -36,9 +39,10 @@ A list of scalars denotes each of its elements.
 - compiler: [gcc, clang]
 ```
 
-The elements must be scalars other than null. A list that should be kept as one
-value is wrapped in `_literal`. Duplicate elements denote the same value once,
-and an empty list denotes the empty set of type `{compiler}`.
+The elements must be scalars other than null, and no element may begin with `$`.
+A list that should be kept as one value is wrapped in `_literal`. Duplicate
+elements denote the same value once, and an empty list denotes the empty set of
+type `{compiler}`.
 
 ## Interval
 
@@ -67,8 +71,8 @@ exactly. An interval with `start` equal to `stop` denotes one value.
 ## Literal
 
 `_literal` marks its content as data. The content is any value of the data
-model, including lists, dictionaries and null, and is not interpreted as Keyso.
-A literal always denotes exactly one value.
+model, including lists, dictionaries, null and strings beginning with `$`, and
+is not interpreted as Keyso. A literal always denotes exactly one value.
 
 ``` { .yaml .keyso title="A literal" }
 - params: {_literal: {nx: 128, ny: 128, solver: [cg, gmres]}}
@@ -84,36 +88,20 @@ Its type is `{params}`: the keys inside the literal are data, not paths. The
 configuration keeps the `_literal` marker when written out, so that it is not
 mistaken for one with the paths `params.nx`, `params.ny` and `params.solver`.
 
-## Nested
+## Strings beginning with `$`
 
-`_nested` names another definition of the same document. The operand denotes
-that set with every path prefixed by the path of the operand.
+A string beginning with `$` is a reference wherever a reference is allowed, and
+invalid wherever a value is written directly. A value that begins with `$`, such
+as an environment variable, is written with `_literal`:
 
-``` { .yaml .keyso title="A nested value" }
-builds:
-  - compiler: [gcc, clang]
-  - optimization: [O2, O3]
-  - _operation: product
-
-matrix:
-  - build: {_nested: builds}
-  - _operation: product
+``` { .yaml .keyso title="A string beginning with $ as data" }
+- prefix: {_literal: $SCRATCH/install}
 ```
 
-denotes:
-
-``` { .yaml .result title="Configurations of matrix" }
-- {build: {compiler: gcc, optimization: O2}}
-- {build: {compiler: gcc, optimization: O3}}
-- {build: {compiler: clang, optimization: O2}}
-- {build: {compiler: clang, optimization: O3}}
-```
-
-The type of `matrix` is `{build.compiler, build.optimization}`. The named set
-must have at least one path, so that the key of the operand appears in the
-result. To merge the set into the result without a prefix, use a [reference
-operand](operands.md#reference-operand); [References and
-nesting](composition.md) compares the two.
+Without the marker, `- prefix: $SCRATCH/install` would be read as a reference to
+a definition named `SCRATCH/install`, and the document would be invalid because
+no such definition exists. Keyso does not interpolate references: `$a/$b` is
+never a template.
 
 ## Null
 
@@ -136,7 +124,7 @@ invalid:
 - params: {nx: 128, ny: 128}
 ```
 
-A dictionary value must have exactly one key, and that key must be `_interval`,
-`_literal` or `_nested`. To assign values to the paths `params.nx` and
-`params.ny`, use two inline operands with dotted keys, or a configuration
-operand under `set`.
+A dictionary value must have exactly one key, and that key must be `_interval`
+or `_literal`. To assign values to the paths `params.nx` and `params.ny`, use
+two inline operands with dotted keys, a keyed reference to a definition with the
+keys `nx` and `ny`, or a configuration operand under `set`.
