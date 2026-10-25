@@ -107,31 +107,6 @@ definition begins with `$`. Keys never begin with either, so neither a language
 word nor a reference can be mistaken for a key. New words can be added later
 without changing the meaning of existing documents.
 
-## Where to go next
-
-<div class="grid cards" markdown>
-
--   **[Language](language/index.md)**
-
-    Documents, operands, values and operations, with an example for every
-    construct.
-
--   **[Formalism](formalism/index.md)**
-
-    Keys, paths, values, configurations, types and configuration sets defined
-    mathematically, and the meaning of a document in those terms.
-
--   **[Examples](examples.md)**
-
-    Complete documents for common tasks, from compiler matrices to
-    cross-compilation.
-
--   **[Design notes](design.md)**
-
-    The reasons behind the shape of the language.
-
-</div>
-
 ## Scope
 
 This site specifies the Keyso language. It does not document a parser, a

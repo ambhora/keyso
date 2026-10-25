@@ -46,7 +46,7 @@ uv run properdocs build --strict
 
 The second command writes the site to `build/site`.
 
-## Licence
+## License
 
 Apache-2.0. The repository follows the [REUSE](https://reuse.software)
 specification.

@@ -24,6 +24,8 @@ jobs:
           persist-credentials: false
       # v6.8.0
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e
+      - name: Check licensing
+        run: uvx reuse@6.2.0 lint
       - name: Build documentation
         run: uv run --locked properdocs build --strict
       # v3.0.1

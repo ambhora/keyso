@@ -3,18 +3,34 @@
 /* SPDX-FileCopyrightText: 2026 keyso developers                              */
 /* -------------------------------------------------------------------------- */
 
-/* Definitions and theorems of the formalism: the background carries the
-   colour, the text stays black or white, and the title has no icon. */
+/* Colours. Each kind of code block has a solid colour for its label and a
+   tint for its background; definitions and theorems share the tints of
+   Keyso blocks and of configurations. */
 :root {
-  --keyso-definition: #e8eaf6;
-  --keyso-theorem: #e8f5e9;
+  --keyso-kind-keyso: #3949ab;
+  --keyso-kind-result: #2e7d32;
+  --keyso-kind-invalid: #c62828;
+  --keyso-kind-foreign: #9a5800;
+  --keyso-kind-grammar: #546e7a;
+  --keyso-tint-keyso: #e8eaf6;
+  --keyso-tint-result: #e8f5e9;
+  --keyso-tint-invalid: #fdecea;
+  --keyso-tint-foreign: #fff1db;
+  --keyso-tint-grammar: #eceff1;
+  --keyso-definition: var(--keyso-tint-keyso);
+  --keyso-theorem: var(--keyso-tint-result);
 }
 
 [data-md-color-scheme="slate"] {
-  --keyso-definition: #262a40;
-  --keyso-theorem: #233026;
+  --keyso-tint-keyso: #262a40;
+  --keyso-tint-result: #1f2d22;
+  --keyso-tint-invalid: #3a2224;
+  --keyso-tint-foreign: #3a2d18;
+  --keyso-tint-grammar: #2a3034;
 }
 
+/* Definitions and theorems of the formalism: the background carries the
+   colour, the text stays black or white, and the title has no icon. */
 .md-typeset .admonition.definition,
 .md-typeset .admonition.theorem {
   border: none;
@@ -50,27 +66,6 @@
    invalid, foreign and grammar select a label and a colour; the title of
    the fence is the caption. Backgrounds carry the colour and the text
    stays black or white. */
-:root {
-  --keyso-kind-keyso: #3949ab;
-  --keyso-kind-result: #2e7d32;
-  --keyso-kind-invalid: #c62828;
-  --keyso-kind-foreign: #9a5800;
-  --keyso-kind-grammar: #546e7a;
-  --keyso-tint-keyso: #e8eaf6;
-  --keyso-tint-result: #e8f5e9;
-  --keyso-tint-invalid: #fdecea;
-  --keyso-tint-foreign: #fff1db;
-  --keyso-tint-grammar: #eceff1;
-}
-
-[data-md-color-scheme="slate"] {
-  --keyso-tint-keyso: #262a40;
-  --keyso-tint-result: #1f2d22;
-  --keyso-tint-invalid: #3a2224;
-  --keyso-tint-foreign: #3a2d18;
-  --keyso-tint-grammar: #2a3034;
-}
-
 .md-typeset .highlight.keyso {
   --keyso-kind: var(--keyso-kind-keyso);
   --keyso-tint: var(--keyso-tint-keyso);

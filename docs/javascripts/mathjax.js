@@ -18,7 +18,6 @@ window.MathJax = {
       calD: "\\mathcal{D}",
       calK: "\\mathcal{K}",
       calO: "\\mathcal{O}",
-      calR: "\\mathcal{R}",
       calT: "\\mathcal{T}",
       calV: "\\mathcal{V}",
       sem: ["[\\![ #1 ]\\!]", 1],
