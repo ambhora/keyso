@@ -2,7 +2,7 @@
 SPDX-FileCopyrightText: 2026 keyso developers
 SPDX-License-Identifier: Apache-2.0
 -->
-# Reference
+# Summary
 
 A compact summary of the language. The other pages of this section explain each
 construct with examples.

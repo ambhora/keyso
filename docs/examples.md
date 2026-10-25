@@ -49,6 +49,8 @@ builds:
   - _operation: difference
 ```
 
+Three configurations of type `{compiler, optimization}`.
+
 ## Add a special case to a grid
 
 ``` { .yaml .keyso title="Grid with a special case" }
@@ -67,6 +69,8 @@ builds:
   - _operation: union
 ```
 
+Five configurations of type `{compiler, optimization}`.
+
 ## Reuse one set in several others
 
 ``` { .yaml .keyso title="One set reused in two definitions" }
@@ -84,6 +88,9 @@ release_builds:
   - optimization: [O2, O3]
   - _operation: product
 ```
+
+Two debug and four release configurations, both of type
+`{compiler, optimization}`.
 
 ## Build and run sections, merged
 

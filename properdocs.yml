@@ -83,7 +83,7 @@ nav:
       - Operations: language/operations.md
       - References: language/references.md
       - Normal form: language/normal-form.md
-      - Reference: language/reference.md
+      - Summary: language/summary.md
   - Formalism:
       - formalism/index.md
       - Algebra: formalism/algebra.md
