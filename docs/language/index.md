@@ -6,7 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 A Keyso document describes configuration sets. This section specifies the
 language construct by construct; the [formalism](../formalism/index.md) gives
-the same rules in mathematical form.
+the same rules in mathematical form. Documents are written in
+[KORML](https://ambhora.github.io/korml/versions/v0/), whose scalars are text
+and whose mappings have no duplicate keys.
 
 ## Documents
 
@@ -20,19 +22,21 @@ A document is a dictionary. Its keys are **names** and its values are
   - _operation: <operation>
 ```
 
-A definition is a list of items: one or more operands and exactly one
-`_operation` item. The `_operation` item is written last by convention; its
-position in the list carries no meaning.
+A document has zero or more definitions; an empty document defines no sets. A
+definition is a list of items: one or more operands and exactly one `_operation`
+item. Every item is a dictionary. The
+`_operation` item is written last by convention; its position in the list
+carries no meaning.
 
 Names are unique, because the document is a dictionary, and the order of
-definitions carries no meaning. A definition is referred to by its name with a
-`$` in front: the definition `build` is referred to as `$build`. A name is not a
+definitions carries no meaning. A definition is referred to by `_ref` and its
+name: the definition `build` is referred to as `{_ref: build}`. A name is not a
 key: it never appears in the configurations of the set it names.
 
 ## Keys and paths
 
-A **key** is a non-empty string that does not begin with `_` or `$` and contains
-no `.`. Names follow the same rule.
+A **key** is a non-empty string that does not begin with `_` and contains no
+`.`. Names follow the same rule.
 
 A **path** joins one or more keys with `.`, such as `compiler` or
 `build.compiler`. A configuration assigns values to paths, and its **type** is
@@ -54,8 +58,8 @@ are the same configuration, of type `{system, build.compiler, build.mpi}`.
 | Item | Form | Meaning |
 | --- | --- | --- |
 | operation item | `_operation: <operation>` | the operation that combines the operands |
-| reference operand | `$name` | the set defined under `name`, with its own paths |
-| keyed reference | `path: $name` | the set defined under `name`, every path prefixed with `path.` |
+| reference operand | `_ref: name` | the set defined under `name`, with its own paths |
+| keyed reference | `path: {_ref: name}` | the set defined under `name`, every path prefixed with `path.` |
 | inline operand | `path: value` | a set of type `{path}`, one configuration per value |
 | configuration operand | `{path: entry, ...}` | one configuration, under `_operation: set` only |
 
@@ -70,23 +74,24 @@ reference and [Operations](operations.md) the five operations.
 - **No nested definitions.** A definition never appears inside another
   definition. Another set is used through a reference.
 - **No cycles.** The references between definitions must not form a cycle.
-- **Language words begin with `_`.** Every string beginning with `_` is reserved
-  for the language, including strings not yet in use. A key or a name beginning
-  with `_` is invalid.
-- **References begin with `$`.** A string beginning with `$` is a reference
-  wherever a reference is allowed and invalid wherever a value is written
-  directly. Data beginning with `$` is written with `_literal`. References are
-  not interpolated: `$a/$b` is not a template.
-- **Marked dictionaries.** A dictionary used as the value of an inline operand
-  must be marked as `_interval` or `_literal`.
-- **No bare null.** Null is written `{_literal: null}`. A null value written
-  directly is invalid.
+- **Language words begin with `_`.** Every dictionary key beginning with `_` is
+  reserved for the language, including keys not yet in use. A key or a name
+  beginning with `_` is invalid.
+- **References are marked.** A reference is the dictionary `{_ref: name}`, as an
+  item or as the value of an entry. A string is never a reference, and string
+  values are never interpreted.
+- **Marked dictionaries.** A dictionary used as the value of an operand entry
+  must be marked as `_ref`, `_interval` or `_literal`.
+- **Values are strings.** Keyso assigns no numeric, boolean or null types: `16`
+  and `true` are strings, and two values are equal when they are the same
+  string. `_interval` is the only construct that reads strings as integers.
 
 ## Language words
 
 | Word | Position |
 | --- | --- |
 | `_operation` | item key naming the operation of a definition |
+| `_ref` | item key, or single key of a dictionary value: a reference to a definition |
 | `_literal` | single key of a dictionary value: uninterpreted data |
 | `_interval` | single key of a dictionary value: a finite range of integers |
 

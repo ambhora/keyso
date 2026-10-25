@@ -44,8 +44,8 @@ unsupported:
   - _operation: set
 
 builds:
-  - $candidates
-  - $unsupported
+  - _ref: candidates
+  - _ref: unsupported
   - _operation: difference
 ```
 
@@ -64,8 +64,8 @@ special:
   - _operation: set
 
 builds:
-  - $grid
-  - $special
+  - _ref: grid
+  - _ref: special
   - _operation: union
 ```
 
@@ -79,12 +79,12 @@ compilers:
   - _operation: product
 
 debug_builds:
-  - $compilers
+  - _ref: compilers
   - optimization: O0
   - _operation: product
 
 release_builds:
-  - $compilers
+  - _ref: compilers
   - optimization: [O2, O3]
   - _operation: product
 ```
@@ -107,8 +107,8 @@ run:
 
 jobs:
   - system: [jedi, jupiter]
-  - $build
-  - $run
+  - _ref: build
+  - _ref: run
   - _operation: product
 ```
 
@@ -126,8 +126,8 @@ With the same `build` and `run`:
 ``` { .yaml .keyso title="Nested build and run sections" }
 jobs:
   - system: [jedi, jupiter]
-  - build: $build
-  - run: $run
+  - build: {_ref: build}
+  - run: {_ref: run}
   - _operation: product
 ```
 
@@ -160,8 +160,8 @@ toolchain:
   - _operation: product
 
 cross:
-  - host: $toolchain
-  - target: $toolchain
+  - host: {_ref: toolchain}
+  - target: {_ref: toolchain}
   - _operation: product
 
 native:
@@ -170,13 +170,13 @@ native:
   - _operation: set
 
 true_cross:
-  - $cross
-  - $native
+  - _ref: cross
+  - _ref: native
   - _operation: difference
 ```
 
-The same set is placed under two keys; using `$toolchain` twice as an operand
-would contribute `compiler` twice. `true_cross` contains the two pairs whose
+The same set is placed under two keys; referring to `toolchain` twice as an
+operand would contribute `compiler` twice. `true_cross` contains the two pairs whose
 compilers differ.
 
 ## Parameters as data

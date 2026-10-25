@@ -4,14 +4,14 @@ SPDX-License-Identifier: Apache-2.0
 -->
 # References
 
-A definition uses the set of another definition through a reference: `$`
-followed by the name of the definition. Where the reference is written decides
-where the paths of the referenced set end up.
+A definition uses the set of another definition through a reference: the
+dictionary `{_ref: name}`, where `name` is the name of the definition. Where the
+reference is written decides where the paths of the referenced set end up.
 
 | Position | Written as | Paths of the result |
 | --- | --- | --- |
-| as an operand | `- $build` | the paths of `build`, unchanged |
-| as the value of a key | `- key: $build` | the paths of `build`, each prefixed with `key.` |
+| as an operand | `- _ref: build` | the paths of `build`, unchanged |
+| as the value of a key | `- key: {_ref: build}` | the paths of `build`, each prefixed with `key.` |
 
 ## One set, two shapes
 
@@ -24,12 +24,12 @@ build:
   - _operation: product
 ```
 
-**As an operand**, `$build` contributes the paths of `build` unchanged:
+**As an operand**, the reference contributes the paths of `build` unchanged:
 
 ``` { .yaml .keyso title="build as an operand" }
 run:
   - system: [jedi, jupiter]
-  - $build
+  - _ref: build
   - _operation: product
 ```
 
@@ -41,13 +41,13 @@ The type of `run` is `{system, compiler, mpi}`:
 - ...
 ```
 
-**As the value of a key**, `$build` contributes the paths of `build` below that
-key:
+**As the value of a key**, the reference contributes the paths of `build` below
+that key:
 
 ``` { .yaml .keyso title="build under a key" }
 run:
   - system: [jedi, jupiter]
-  - build: $build
+  - build: {_ref: build}
   - _operation: product
 ```
 
@@ -59,10 +59,10 @@ The type of `run` is `{system, build.compiler, build.mpi}`:
 - ...
 ```
 
-The key and the definition need not share a name; `- toolchain: $build` is
-equally valid, and so is a dotted key such as `- stage.build: $build`. The
-referenced set must have at least one path, so that the key appears in the
-result.
+The key and the definition need not share a name; `- toolchain: {_ref: build}`
+is equally valid, and so is a dotted key such as
+`- stage.build: {_ref: build}`. Every definition has at least one path, so the
+key always appears in the result.
 
 ## Nesting is prefixing
 
@@ -101,14 +101,14 @@ toolchain:
   - _operation: product
 
 cross:
-  - host: $toolchain
-  - target: $toolchain
+  - host: {_ref: toolchain}
+  - target: {_ref: toolchain}
   - _operation: product
 ```
 
-The type of `cross` is `{host.compiler, target.compiler}`. Using `$toolchain`
-twice as an operand of a product is invalid, because both operands would
-contribute `compiler`.
+The type of `cross` is `{host.compiler, target.compiler}`. Writing
+`- _ref: toolchain` twice as an operand of a product is invalid, because both
+operands would contribute `compiler`.
 
 ## Addressing nested paths
 
@@ -122,8 +122,8 @@ native:
   - _operation: set
 
 true_cross:
-  - $cross
-  - $native
+  - _ref: cross
+  - _ref: native
   - _operation: difference
 ```
 
@@ -143,8 +143,8 @@ resources:
   - _operation: product
 
 job:
-  - $resources
-  - build: $build
+  - _ref: resources
+  - build: {_ref: build}
   - _operation: product
 ```
 
@@ -157,11 +157,10 @@ consumer reads them at the top level. Place it under a key when its
 configurations form a unit that is passed on as a whole, or when its keys would
 collide with the keys of other operands.
 
-## Strings beginning with `$`
+## Where references are read
 
-A string beginning with `$` is a reference only where a reference is allowed: as
-an operand, or as the value of an entry in an operand. Anywhere else a value is
-written directly, in a list, in a configuration operand or as an interval field,
-such a string is invalid. Data that begins with `$` is written with `_literal`,
-as described under [Values](values.md#strings-beginning-with). A reference names
-a whole definition; Keyso has no interpolation.
+`{_ref: name}` is a reference in two positions only: as an operand, and as the
+value of the entry of an operand under `product`, `union`, `intersection` or
+`difference`. Under `set` it is invalid, and inside `_literal` or a list in a
+configuration operand it is data. A string is never a reference. A reference
+names a whole definition.

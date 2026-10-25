@@ -48,39 +48,40 @@ product and an explicit set:
 ``` { .yaml .keyso title="The same matrix in Keyso" }
 grid:
   - os: [ubuntu, macos]
-  - python: ["3.10", "3.11", "3.12"]
+  - python: [3.10, 3.11, 3.12]
   - _operation: product
 
 excluded:
-  - {os: macos, python: "3.10"}
-  - {os: ubuntu, python: "3.12"}
+  - {os: macos, python: 3.10}
+  - {os: ubuntu, python: 3.12}
   - _operation: set
 
 matrix:
-  - $grid
-  - $excluded
+  - _ref: grid
+  - _ref: excluded
   - _operation: difference
 ```
 
 A description written this way is only as complex as the set it describes. Every
-intermediate set has a name and can be inspected on its own.
+intermediate set has a name and can be inspected on its own. Every value is a
+string, so `3.10` needs no quotes and is never read as the number 3.1.
 
 ## References
 
-Definitions refer to one another with `$` and a name. Where a reference is
-written decides what it denotes. As an operand of its own, `- $build` merges the
-set of `build` into the result with its own keys. As the value of a key,
-`- build: $build` places the set under that key.
+Definitions refer to one another with `_ref` and a name. Where a reference is
+written decides what it denotes. As an operand of its own, `- _ref: build`
+merges the set of `build` into the result with its own keys. As the value of a
+key, `- build: {_ref: build}` places the set under that key.
 
 ``` { .yaml .keyso title="A set referenced and nested" }
 flat_jobs:
   - system: [jedi, jupiter]
-  - $build
+  - _ref: build
   - _operation: product
 
 nested_jobs:
   - system: [jedi, jupiter]
-  - build: $build
+  - build: {_ref: build}
   - _operation: product
 ```
 
@@ -99,17 +100,18 @@ dictionary is how a configuration with the paths `build.compiler` and
 `build.mpi` is written. [References](language/references.md) describes both
 positions in detail.
 
-## Two prefixes
+## Reserved words
 
-Two prefixes keep the parts of a document apart. Every word of the language
-begins with `_`: `_operation`, `_literal` and `_interval`. Every reference to a
-definition begins with `$`. Keys never begin with either, so neither a language
-word nor a reference can be mistaken for a key. New words can be added later
-without changing the meaning of existing documents.
+Every word of the language is a dictionary key that begins with `_`:
+`_operation`, `_ref`, `_literal` and `_interval`. Keys of configurations never
+begin with `_`, so a language word cannot be mistaken for a key, and new words
+can be added later without changing the meaning of existing documents. String
+values are never interpreted: `$SCRATCH/install` is an ordinary value.
 
 ## Scope
 
 This site specifies the Keyso language. It does not document a parser, a
 command-line tool or the API of an implementation. The language is defined on a
-data model of dictionaries, lists, strings, numbers, booleans and null, so any
-serialization of that model can carry a Keyso document. The examples use YAML.
+data model of dictionaries, lists and strings, the document model of
+[KORML](https://ambhora.github.io/korml/versions/v0/), in which every example
+is written.

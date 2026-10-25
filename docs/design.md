@@ -23,31 +23,30 @@ reused and tested on its own, and an error points to a named definition rather
 than a position deep inside an expression. Each definition names exactly one
 operation, so it reads like one equation of the algebra.
 
-## Two reserved prefixes
+## One reserved prefix
 
-Every word of the language begins with `_`, every reference to a definition
-begins with `$`, and keys begin with neither. A language word or a reference can
-therefore not be mistaken for a key, wherever it appears. Reserving a prefix
-rather than individual words also means that a later version can add a word
-without changing the meaning of any valid document. An earlier draft used plain
-words such as `operation` and `flatten`; in operand position they looked like
-ordinary keys.
+Every word of the language is a dictionary key beginning with `_`, and keys of
+configurations never begin with `_`. A language word can therefore not be
+mistaken for a key, wherever it appears. Reserving a prefix rather than
+individual words also means that a later version can add a word without
+changing the meaning of any valid document. Only keys are reserved: string
+values are never interpreted, so the language places no rule on their content.
+An earlier draft used plain words such as `operation` and `flatten`; in operand
+position they looked like ordinary keys.
 
 ## One construct for references
 
-A reference `$name` denotes the named set nested under the path where it is
-written. As an operand it is written at the empty path and merges the set
+A reference `{_ref: name}` denotes the named set nested under the path where it
+is written. As an operand it is written at the empty path and merges the set
 unchanged; as the value of a key it places the set under that key. In the
-algebra both are nestings, so the language needs a single construct. Earlier
-drafts used a bare name for the first position and a `_nested` marker for the
-second; a bare name looked like a value, and the marker described a reference as
-if it were a value.
+algebra both are nestings, so the language needs a single construct. A reference
+is a marked dictionary like `_literal` and `_interval`, so it is recognized by
+its structure and never by the content of a string.
 
-The cost of the `$` prefix is that a value cannot begin with `$` unmarked.
-Environment variables such as `$SCRATCH` are common in configurations, so such
-data is written with `_literal`. A `$` string in any other position is an error,
-never a silent change of meaning, and Keyso has no interpolation that would make
-`$a/$b` a template.
+Earlier drafts used other forms. A bare name looked like a value. A `_nested`
+marker described a reference as if it were a value. A `$` prefix reserved a
+class of strings, so that data such as `$SCRATCH/install` had to be escaped, and
+every string had to be checked for a leading `$`.
 
 ## Paths
 
@@ -61,19 +60,22 @@ where a set operation needs them.
 ## Marked dictionaries
 
 A dictionary in a document is either a construct to interpret or data to keep.
-Keyso never guesses. In an inline operand, every dictionary value is marked as
-`_interval` or `_literal`. In a configuration operand, a dictionary
-describes paths and a dictionary value is marked with `_literal`. Normal forms
-keep the marker, so writing a configuration and reading it back gives the same
-configuration.
+Keyso never guesses. As the value of an operand entry, every dictionary is
+marked as `_ref`, `_interval` or `_literal`. In a configuration operand, a
+dictionary describes paths and a dictionary value is marked with `_literal`.
+Normal forms keep the marker, so writing a configuration and reading it back
+gives the same configuration.
 
-## No bare null
+## Values are strings
 
-In YAML, a key with nothing after its colon is null. An inline operand written
-with a stray colon, `- compiler:` with its values forgotten, would otherwise be
-a valid operand with a null value. Requiring `{_literal: null}` makes the slip
-an error. The same slip on a reference, `- $build:`, fails twice: the key begins
-with `$` and its value is null.
+Keyso documents are written in KORML, whose scalars are text, and Keyso adds no
+types of its own. `16`, `true` and `3.10` are strings, two values are equal
+when they are the same string, and no value changes when a document is
+re-serialized. There is no null; a key with nothing after its colon is already
+invalid KORML. Typed interpretation of values, like restrictions on them,
+belongs to the tools that consume configurations. `_interval` is the one
+construct that reads strings as integers, and it writes its results back as
+strings.
 
 ## Typed empty sets
 
@@ -92,6 +94,7 @@ schemas and validators built on Keyso.
 
 ## Language, not implementation
 
-This site specifies the language on a data model. It does not depend on YAML,
-JSON or any implementation, and an implementation is correct when it agrees with
-the [formalism](formalism/index.md).
+This site specifies the language on a data model of strings, lists and
+dictionaries, the document model of KORML. It does not depend on any
+implementation, and an implementation is correct when it agrees with the
+[formalism](formalism/index.md).

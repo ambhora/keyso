@@ -4,22 +4,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 # Operands
 
-An operand is an item of a definition other than the `_operation` item. Keyso
-has four forms of operand.
+An operand is an item of a definition other than the `_operation` item. Every
+operand is a dictionary, and Keyso has four forms of operand.
 
 | Operand | Form | Permitted under |
 | --- | --- | --- |
-| reference operand | `$name` | `product`, `union`, `intersection`, `difference` |
-| keyed reference | `path: $name` | `product`, `union`, `intersection`, `difference` |
+| reference operand | `_ref: name` | `product`, `union`, `intersection`, `difference` |
+| keyed reference | `path: {_ref: name}` | `product`, `union`, `intersection`, `difference` |
 | inline operand | `path: value` | `product`, `union`, `intersection`, `difference` |
 | configuration operand | `{path: entry, ...}` | `set` |
 
 ## Reference operand
 
-A reference operand is a string made of `$` and the name of another definition
-in the same document. It denotes the set of that definition unchanged, with the
-same type and the same configurations. Within the enclosing operation, the paths
-of the referenced set stand beside the paths of the other operands.
+A reference operand is a dictionary with the single entry `_ref: name`, where
+`name` is the name of another definition in the same document. It denotes the
+set of that definition unchanged, with the same type and the same
+configurations. Within the enclosing operation, the paths of the referenced set
+stand beside the paths of the other operands.
 
 ``` { .yaml .keyso title="A reference operand" }
 builds:
@@ -28,7 +29,7 @@ builds:
   - _operation: product
 
 matrix:
-  - $builds
+  - _ref: builds
   - system: [jedi, jupiter]
   - _operation: product
 ```
@@ -43,32 +44,32 @@ special:
   - _operation: set
 
 all_builds:
-  - $builds
-  - $special
+  - _ref: builds
+  - _ref: special
   - _operation: union
 ```
 
 ## Keyed reference
 
-A keyed reference is a dictionary with exactly one entry whose value is a
-reference. It denotes the set of the referenced definition with every path
-prefixed by the key of the entry.
+A keyed reference is a dictionary with exactly one entry whose key is a path and
+whose value is a reference `{_ref: name}`. It denotes the set of the referenced
+definition with every path prefixed by the key of the entry.
 
 ``` { .yaml .keyso title="A keyed reference" }
 matrix:
-  - build: $builds
+  - build: {_ref: builds}
   - system: [jedi, jupiter]
   - _operation: product
 ```
 
-The type of `matrix` is `{build.compiler, build.optimization, system}`. The
-referenced set must have at least one path, so that the key appears in the
-result. [References](references.md) compares the two positions of a reference.
+The type of `matrix` is `{build.compiler, build.optimization, system}`. Every
+definition has at least one path, so the key always appears in the result.
+[References](references.md) compares the two positions of a reference.
 
 ## Inline operand
 
-An inline operand is a dictionary with exactly one entry whose value is not a
-reference. Its key is a path and its value determines the configurations; see
+An inline operand is a dictionary with exactly one entry whose key is a path and
+whose value is not a reference. The value determines the configurations; see
 [Values](values.md). The operand denotes a set whose type is that path, with one
 configuration per value.
 
@@ -104,7 +105,7 @@ and each entry is read as follows:
 
 | Entry | Read as |
 | --- | --- |
-| scalar other than null and not beginning with `$` | the value of the path |
+| scalar | the value of the path |
 | list | the value of the path, taken verbatim |
 | `{_literal: data}` | the value of the path, `data` taken verbatim |
 | dictionary with one or more entries | further paths below the path |
@@ -129,17 +130,17 @@ pairs:
 ```
 
 Both configurations have the type `{host.compiler, target.compiler}`. A
-dictionary that is a value in its own right is marked with `_literal`, and so is
-a string that begins with `$`:
+dictionary that is a value in its own right is marked with `_literal`. Strings
+are taken as they are:
 
-``` { .yaml .keyso title="Values marked as data" }
+``` { .yaml .keyso title="A dictionary marked as data" }
 installs:
-  - {mesh: {_literal: {nx: 128, ny: 128}}, prefix: {_literal: $SCRATCH/install}}
+  - {mesh: {_literal: {nx: 128, ny: 128}}, prefix: $SCRATCH/install}
   - _operation: set
 ```
 
 The type of `installs` is `{mesh, prefix}`. A configuration operand denotes
-exactly one configuration, so references and `_interval` are invalid in it.
+exactly one configuration, so `_ref` and `_interval` are invalid in it.
 
 ## Invalid operands
 
@@ -153,15 +154,16 @@ matrix:
   - _operation: product
 ```
 
-A reference operand written with a trailing colon is invalid as well:
+An item that is not a dictionary is invalid as well. In particular, a bare name
+is not a reference:
 
-``` { .yaml .invalid title="A reference with a trailing colon" }
+``` { .yaml .invalid title="A bare name as an item" }
 matrix:
-  - $builds:
+  - builds
   - system: [jedi, jupiter]
   - _operation: product
 ```
 
-`- $builds:` is a dictionary with the key `$builds` and a null value. A key
-cannot begin with `$`, and null must be written `{_literal: null}`, so the slip
-is reported instead of silently denoting a different set.
+`- builds` is the string `builds`. A reference is always written
+`- _ref: builds`, so the slip is reported instead of silently denoting a
+different set.

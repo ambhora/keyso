@@ -10,53 +10,61 @@ definition of a document to a configuration set.
 
 ## Data model
 
-A Keyso document is a value of a data model of strings, numbers, booleans, null,
-lists and dictionaries. The definitions below use this model and not a
-serialization.
+A Keyso document is a value of a data model of strings, lists and dictionaries.
+This is the document model of [KORML](https://ambhora.github.io/korml/versions/v0/):
+scalars are text, there is no null, keys are strings and no dictionary has two
+entries with the same key. A KORML source without a root value is the empty
+dictionary. The definitions below use the data model and not its syntax.
 
 !!! definition "Definition 16: Data"
 
-    Let $\Sigma$ be the set of strings. The set of **scalars** $\calA$ contains
-    the strings, the numbers, the booleans $\texttt{true}$ and $\texttt{false}$,
-    and $\texttt{null}$. The set of **data** $\calD$ is the smallest set such
-    that
+    Let $\Sigma$ be the set of strings. The set of **data** $\calD$ is the
+    smallest set such that
 
-    1. every scalar is data: $\calA \subseteq \calD$;
+    1. every string is data: $\Sigma \subseteq \calD$;
     2. every finite sequence $(d_1, \dots, d_n)$ of data, $n \geq 0$, is data
        and is called a **list**;
     3. every function $d$ from a finite subset of $\Sigma$ to $\calD$ is data
        and is called a **dictionary**.
 
-    Two data are equal when they are structurally equal: scalars by value, lists
-    element by element, and dictionaries key by key.
+    Two data are equal when they are structurally equal: strings character by
+    character, lists element by element, and dictionaries key by key.
+
+    An **integer string** is the decimal notation of an integer: the string
+    $\texttt{0}$, or an optional $\texttt{-}$ followed by a digit from
+    $\texttt{1}$ to $\texttt{9}$ and any further digits. For an integer string
+    $s$, $\mathrm{int}(s) \in \integers$ is the integer it denotes, and for
+    $z \in \integers$, $\mathrm{dec}(z)$ is its integer string.
+
+Strings are not typed: $\texttt{16}$ and $\texttt{016}$ are different data, and
+$\texttt{true}$ is a string like any other. Every integer has exactly one
+integer string, so $\mathrm{int}$ and $\mathrm{dec}$ are inverse bijections
+between the integer strings and $\integers$.
 
 ## Language words and references
 
 !!! definition "Definition 17: Language words and references"
 
-    A **language word** is a string that begins with $\texttt{\_}$. The words in
-    use are $\texttt{\_operation}$, $\texttt{\_literal}$ and
-    $\texttt{\_interval}$. The **operation names** are
+    A **language word** is a dictionary key that begins with $\texttt{\_}$. The
+    words in use are $\texttt{\_operation}$, $\texttt{\_ref}$,
+    $\texttt{\_literal}$ and $\texttt{\_interval}$. The **operation names** are
     $\calO = \{\texttt{product}, \texttt{union}, \texttt{intersection}, \texttt{difference}, \texttt{set}\}$.
 
-    A **reference** is a string that begins with
-    $\texttt{\$}$. The reference $\texttt{\$}m$ **names** $m$.
+    A **reference** is a dictionary $\{\texttt{\_ref}: m\}$ with $m \in \Sigma$.
+    The reference **names** $m$.
 
 Every language word is reserved, including the words not yet in use. A later
 version of the language can therefore add a word without changing the meaning of
-any valid document. Every string beginning with $\texttt{\$}$ is likewise
-reserved for references, and is invalid wherever a reference is not allowed.
+any valid document. Only dictionary keys are reserved: a string that is a value
+is never interpreted.
 
 ## Keys, paths and values of Keyso
 
 !!! definition "Definition 18: Keys and values"
 
     In Keyso, the set of keys $\calK \subseteq \Sigma$ contains the non-empty
-    strings that begin with neither $\texttt{\_}$ nor
-    $\texttt{\$}$ and do not contain $\texttt{.}$, and the values are the data, $\calV
-    =
-    \calD$. A **plain scalar** is a scalar other than $\texttt{null}$ that is not a reference; the plain scalars form the set $\calA_0
-    \subseteq \calA$.
+    strings that do not begin with $\texttt{\_}$ and do not contain
+    $\texttt{.}$, and the set of values is the set of data, $\calV = \calD$.
 
     A path $(k_1, \dots, k_n)$ is written as the string $k_1.k_2.\cdots.k_n$. A
     **path string** is a string written this way.
@@ -67,7 +75,7 @@ Because keys contain no $\texttt{.}$, a path string determines its path.
 
 A configuration is written as a dictionary that nests one level per key of its
 paths. A value written in it must not be mistaken for further paths, so
-dictionaries and null are marked.
+dictionary values are marked.
 
 !!! definition "Definition 19: Written form"
 
@@ -76,8 +84,8 @@ dictionaries and null are marked.
     $$
     \rho(v) =
     \begin{cases}
-    v & \text{if } v \text{ is a list or a plain scalar}, \\
-    \{\texttt{\_literal}: v\} & \text{otherwise}.
+    v & \text{if } v \text{ is a string or a list}, \\
+    \{\texttt{\_literal}: v\} & \text{if } v \text{ is a dictionary}.
     \end{cases}
     $$
 
@@ -107,16 +115,16 @@ and in the second case the part of $c$ below $k$ is non-empty.
     $$
     \mathrm{read}(p, e) =
     \begin{cases}
-    \{(p, e)\} & \text{if } e \text{ is a list or a plain scalar}, \\
+    \{(p, e)\} & \text{if } e \text{ is a string or a list}, \\
     \{(p, x)\} & \text{if } e = \{\texttt{\_literal}: x\}, \\
     p \cdot \mathrm{read}(e) & \text{if } e \text{ is a non-empty dictionary of path strings}.
     \end{cases}
     $$
 
-    Every other entry is invalid, in particular $\texttt{null}$ and every
-    reference. The dictionary is a **configuration operand**
-    when $\mathrm{read}(d)$ is a configuration: its paths are distinct and form
-    a type.
+    Every other entry is invalid, in particular a reference, an interval and
+    the empty dictionary. The dictionary is a **configuration operand** when
+    $\mathrm{read}(d)$ is a configuration: its paths are distinct and form a
+    type.
 
 !!! theorem "Theorem 6: Reading inverts writing"
 
@@ -124,9 +132,9 @@ and in the second case the part of $c$ below $k$ is non-empty.
     particular, $\rho$ is injective.
 
     *Proof.* By induction on the length of the longest path of $c$. A written
-    value is a list, a plain scalar, or a dictionary whose
-    only key $\texttt{\_literal}$ is not a path string, so $\mathrm{read}$ takes
-    the first two cases exactly for written values and recovers the value. A
+    value is a string, a list, or a dictionary whose only key
+    $\texttt{\_literal}$ is not a path string, so $\mathrm{read}$ takes the
+    first two cases exactly for written values and recovers the value. A
     written part $\rho(c \mathbin{/\!/} k)$ is a dictionary of path strings,
     read by the third case as $k \cdot (c \mathbin{/\!/} k)$ by the induction
     hypothesis. The union over all first keys is $c$. $\square$
@@ -140,18 +148,23 @@ as.
 
 !!! definition "Definition 21: Document"
 
-    A **document** is a dictionary $\delta$ whose keys are **names** and whose
-    values are **definitions**. Names are keys in the sense of Definition 18. A
-    definition is a list of items containing exactly one **operation item**
-    $\{\texttt{\_operation}: o\}$ with $o \in \calO$; the other items are its
-    **operands**, in order.
+    A **document** is a dictionary $\delta$, possibly empty, whose keys are
+    **names** and whose values are **definitions**. Names are keys in the sense
+    of Definition 18. A definition is a list of dictionaries, called **items**,
+    containing exactly one **operation item** $\{\texttt{\_operation}: o\}$
+    with $o \in \calO$; the other items are its **operands**, in order.
 
     The **reference graph** of $\delta$ has the names of $\delta$ as vertices
-    and an edge from $n$ to $m$ when the definition of $n$ contains the
-    reference $\texttt{\$}m$, as an operand or as the value of an entry.
+    and an edge from $n$ to $m$ when an operand of the definition of $n$ is the
+    reference $\{\texttt{\_ref}: m\}$ or a dictionary
+    $\{s: \{\texttt{\_ref}: m\}\}$ with a path string $s$.
 
-    The document is **well formed** when every reference in it names a name of
-    $\delta$ and the reference graph has no cycle.
+    The document is **well formed** when every such $m$ is a name of $\delta$
+    and the reference graph has no cycle.
+
+Only operands are read for references. A dictionary $\{\texttt{\_ref}: m\}$
+inside a literal or inside a list of a configuration operand is data and
+contributes no edge.
 
 In a well-formed document, the definitions can be evaluated in an order in which
 every definition follows the definitions it refers to. The definitions below are
@@ -168,16 +181,21 @@ configuration set its definition denotes.
 
     | Value $v$ | $\mathrm{val}(v)$ | Condition |
     | --- | --- | --- |
-    | $a$ | $\{a\}$ | $a \in \calA_0$ |
-    | $(a_1, \dots, a_n)$ | $\{a_1, \dots, a_n\}$ | $a_i \in \calA_0$ |
-    | $\{\texttt{\_interval}: \{\texttt{start}: s, \texttt{stop}: e, \texttt{step}: r\}\}$ | $\{\, s + i r \mid i \in \mathbb{N},\; s + i r \leq e \,\}$ | $s, e \in \mathbb{Z}$, $s \leq e$, $r \in \mathbb{Z}$, $r \geq 1$ |
+    | $a$ | $\{a\}$ | $a \in \Sigma$ |
+    | $(a_1, \dots, a_n)$ | $\{a_1, \dots, a_n\}$ | $n \geq 0$, $a_i \in \Sigma$ |
+    | $\{\texttt{\_interval}: \{\texttt{start}: s, \texttt{stop}: e, \texttt{step}: r\}\}$ | $\{\, \mathrm{dec}(z_i) \mid i \in \naturals,\; z_i \leq \mathrm{int}(e) \,\}$ with $z_i = \mathrm{int}(s) + i \cdot \mathrm{int}(r)$ | see below |
     | $\{\texttt{\_literal}: d\}$ | $\{d\}$ | $d \in \calD$ |
 
-    In an interval, the field $\texttt{step}$ may be omitted and then $r = 1$. A
-    reference is not a value: an entry whose value is a reference is a keyed
-    reference, Definition 23. Every other value is invalid; in particular
-    $\texttt{null}$, and every dictionary that is not a single language-word
+    In an interval, $s$, $e$ and $r$ are integer strings with
+    $\mathrm{int}(s) \leq \mathrm{int}(e)$ and $\mathrm{int}(r) \geq 1$. The
+    field $\texttt{step}$ may be omitted, and then $\mathrm{int}(r) = 1$. A
+    reference is not a value: an entry whose value is
+    a reference is a keyed reference, Definition 23. Every other value is
+    invalid; in particular every dictionary that is not a single language-word
     entry of this table.
+
+Here $\naturals = \{0, 1, 2, \dots\}$, so $i = 0$ gives $\mathrm{dec}(\mathrm{int}(s)) = s$
+itself.
 
 ## Operands
 
@@ -188,8 +206,8 @@ configuration set its definition denotes.
 
     | Operand | Denotes | Condition |
     | --- | --- | --- |
-    | reference operand $\texttt{\$}m$ | $\varepsilon \cdot \sem{m} = \sem{m}$ | $m$ a name of $\delta$ |
-    | keyed reference $\{s: \texttt{\$}m\}$ | $p_s \cdot \sem{m}$ | $m$ a name of $\delta$, $T_m \neq \varnothing$ |
+    | reference operand $\{\texttt{\_ref}: m\}$ | $\varepsilon \cdot \sem{m} = \sem{m}$ | $m$ a name of $\delta$ |
+    | keyed reference $\{s: \{\texttt{\_ref}: m\}\}$ | $p_s \cdot \sem{m}$ | $m$ a name of $\delta$ |
     | inline operand $\{s: v\}$ | $[p_s \mapsto \mathrm{val}(v)]$ | $v$ a value of Definition 22 |
 
     Here $s$ is a path string and $p_s$ its path. Under $\texttt{set}$, a
@@ -197,9 +215,8 @@ configuration set its definition denotes.
 
 Both kinds of reference are nestings in the sense of Definition 15: a reference
 denotes the named set nested under the path where it is written, and a reference
-operand is written at the empty path. By
-Theorem 5, an inline operand with a dotted key is the nesting of an inline
-operand with a plain key:
+operand is written at the empty path. By Theorem 5, an inline operand with a
+dotted key is the nesting of an inline operand with a plain key:
 $\sem{\{\texttt{run.nodes}: v\}} = \texttt{run} \cdot \sem{\{\texttt{nodes}: v\}}$.
 
 ## Definitions
@@ -225,6 +242,24 @@ $\sem{\{\texttt{run.nodes}: v\}} = \texttt{run} \cdot \sem{\{\texttt{nodes}: v\}
     A definition is **valid** when its operands are valid and its requirement
     holds. A document is **valid** when it is well formed and all its
     definitions are valid.
+
+!!! theorem "Theorem 7: Non-empty types"
+
+    In a valid document, every definition denotes a configuration set of
+    non-empty type: $T_n \neq \varnothing$ for every name $n$.
+
+    *Proof.* Along the evaluation order. An inline operand has the type
+    $\{p_s\}$. A reference operand has the type $T_m$ and a keyed reference the
+    type $p_s \cdot T_m$, both non-empty because $T_m$ is. A configuration
+    operand has at least one entry, and every valid entry is read as at least
+    one component, so $\mathrm{read}(d)$ is a non-empty configuration. Every
+    operation has at least one operand, and its result type is the union of the
+    operand types or their common type. $\square$
+
+The empty type therefore does not arise in Keyso, and a keyed reference always
+leaves a trace: every path of $p_s \cdot T_m$ begins with $p_s$. Empty
+configuration sets do arise, for example from an intersection or a difference.
+They keep the type of their operands, as in Definition 13.
 
 ## Equivalence and normal form
 

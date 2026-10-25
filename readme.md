@@ -17,12 +17,12 @@ build:
 
 flat_jobs:
   - system: [jedi, jupiter]
-  - $build
+  - _ref: build
   - _operation: product
 
 nested_jobs:
   - system: [jedi, jupiter]
-  - build: $build
+  - build: {_ref: build}
   - _operation: product
 ```
 

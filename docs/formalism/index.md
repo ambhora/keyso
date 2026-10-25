@@ -25,6 +25,8 @@ informally. Where the two differ, this section is authoritative.
 
 | Symbol | Meaning |
 | --- | --- |
+| $\naturals$, $\integers$ | the natural numbers including $0$, and the integers |
+| $\Sigma$, $\calD$ | the strings, and the data of strings, lists and dictionaries |
 | $\calK$, $\calV$ | the set of keys and the set of values |
 | $\calK^{+}$, $\calK^{*}$ | the paths, and the sequences of keys including the empty sequence $\varepsilon$ |
 | $q.p$ | the concatenation of a sequence of keys $q$ and a path $p$ |

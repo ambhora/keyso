@@ -106,7 +106,7 @@ $$
 c = \{(\texttt{system}, \texttt{jedi}), (\texttt{build.compiler}, \texttt{gcc})\}
 $$
 
-has $\calT(c) = \{\texttt{system}, \texttt{build.compiler}\}$. In YAML it is
+has $\calT(c) = \{\texttt{system}, \texttt{build.compiler}\}$. In KORML it is
 written `{system: jedi, build: {compiler: gcc}}`.
 
 ## Projection and product of configurations
@@ -330,5 +330,6 @@ $$
 
 Nesting a set of empty type leaves it unchanged:
 $q \cdot (\varnothing, \{\varnothing\}) = (\varnothing, \{\varnothing\})$, so no
-trace of $q$ remains. [Semantics](semantics.md) therefore requires a nested set
-to have a non-empty type.
+trace of $q$ remains. In Keyso this case does not arise: every definition
+denotes a set of non-empty type, by Theorem 7 in
+[Semantics](semantics.md#definitions).
